@@ -4,7 +4,9 @@ import afsp.*;
 import config.ConfigurationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import process.ListProcessor;
 import util.AfspFileHandler;
+import util.Helper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,28 +35,26 @@ public class AfspConnectionWorkerThread extends Thread {
 
             int _byte;
             LOGGER.info(" ** AFSP request received **");
-//            while ( (_byte = inputStream.read()) >=0) {
-//                System.out.print((char) _byte);
-//            }
-
 
             //TODO read
             AfspRequestParser parser = new AfspRequestParser();
+            AfspRequest request = null;
             AfspResponse response = null;
             try{
-                AfspRequest request = parser.parseAfspRequest(inputStream);
+                request = parser.parseAfspRequest(inputStream);
             } catch (AfspParsingException e){
                 response = new AfspResponse(e.getErrorCode());
             }
-
             if (response == null){
                 response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
             }
+            if (request.getMethod() == AfspMethod.LIST){
+                LOGGER.info(" ** PROCESSING LIST **");
+                var processor = new ListProcessor(request,response);
+                processor.process();
+            }//Send response
+            LOGGER.warn("SERVER RESPONSE:\n" +response.toString());
             outputStream.write(response.toString().getBytes());
-
-
-
-
 
             //TODO writing
 //            String html = "<html><head><title>Title</title></head><body><h1>hi!</h1></body></html>";
@@ -75,25 +75,7 @@ public class AfspConnectionWorkerThread extends Thread {
             //TODO handle error
             e.printStackTrace();
         } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                }
-            }
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                }
-            }
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                }
-            }
-
+            Helper.closeConnections(inputStream,outputStream,socket);
         }
     }
 

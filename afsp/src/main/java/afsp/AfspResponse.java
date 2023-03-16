@@ -1,8 +1,13 @@
 package afsp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
-public class AfspResponse {
+public class AfspResponse extends AfspMessage{
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(AfspResponse.class);
 
     private final String protocol = AfspProtocolVersion.AFSP_1_0.toString();
     private int statusCode;
@@ -29,20 +34,27 @@ public class AfspResponse {
         responseString =  protocol + " " +
                 statusCode + " " +
                 message + "\r\n";
-        if (this.headerlist != null && !this.headerlist.isEmpty()){
-            responseString += printHeaders();
+
+        responseString += printHeaders();
+        if (this.body !=null){
+            responseString += this.body;
         }
         return responseString;
     }
 
 
     private String printHeaders(){
-        if (headerlist == null || headerlist.isEmpty()) return "";
-        String headerString = "";
-        for (AfspHeader _header:headerlist){
-            headerString += _header.getHeaderType().toString() + ": " + _header.getHeaderContent() +"\r\n";
+        if (headerlist == null || headerlist.isEmpty()) {
+            LOGGER.debug("HEADERLIST EMPTY");
+            return "\r\n";
         }
-        return headerString;
+        String headerString = "";
+
+            for (AfspHeader _header : headerlist) {
+                headerString += _header.getHeaderType().toString() + ": " + _header.getHeaderContent() + "\r\n";
+            }
+
+        return headerString+"\r\n";
     }
 
     public int getStatusCode() {

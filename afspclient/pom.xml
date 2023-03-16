@@ -58,6 +58,12 @@
             <version>obers-1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>obers</groupId>
+            <artifactId>util</artifactId>
+            <version>obers-1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 
