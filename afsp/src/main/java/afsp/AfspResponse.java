@@ -12,7 +12,6 @@ public class AfspResponse extends AfspMessage{
     private final String protocol = AfspProtocolVersion.AFSP_1_0.toString();
     private int statusCode;
     private String message;
-    private List<AfspHeader> headerlist = null;
 
     private String body = null;
 
@@ -22,7 +21,7 @@ public class AfspResponse extends AfspMessage{
     }
     public AfspResponse(AfspStatusCode status, List<AfspHeader> headers){
         this(status);
-        this.headerlist = headers;
+        this.headerList = headers;
     }
     public AfspResponse(){
 
@@ -44,13 +43,13 @@ public class AfspResponse extends AfspMessage{
 
 
     private String printHeaders(){
-        if (headerlist == null || headerlist.isEmpty()) {
-            LOGGER.debug("HEADERLIST EMPTY");
+        if (headerList == null || headerList.isEmpty()) {
+            LOGGER.debug("headerList EMPTY");
             return "\r\n";
         }
         String headerString = "";
 
-            for (AfspHeader _header : headerlist) {
+            for (AfspHeader _header : headerList) {
                 headerString += _header.getHeaderType().toString() + ": " + _header.getHeaderContent() + "\r\n";
             }
 
@@ -73,12 +72,12 @@ public class AfspResponse extends AfspMessage{
         this.message = message;
     }
 
-    public List<AfspHeader> getHeaderlist() {
-        return headerlist;
+    public List<AfspHeader> getheaderList() {
+        return headerList;
     }
 
-    public void setHeaderlist(List<AfspHeader> headerlist) {
-        this.headerlist = headerlist;
+    public void setheaderList(List<AfspHeader> headerList) {
+        this.headerList = headerList;
     }
 
     public String getBody() {

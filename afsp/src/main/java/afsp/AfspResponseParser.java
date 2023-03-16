@@ -1,5 +1,7 @@
 package afsp;
 
+import afsp.exception.AfspParsingException;
+import afsp.exception.AfspResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,5 +1,6 @@
 package afsp;
 
+import afsp.exception.AfspParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public class AfspHeader {
     public AfspHeader(HeaderType headerType) {
         this.headerType = headerType;
     }
-    AfspHeader(String headerName) throws AfspParsingException{
+    AfspHeader(String headerName) throws AfspParsingException {
         for(HeaderType _headerType: HeaderType.values()){
             if(headerName.equals(_headerType.toString())){
                 this.headerType = _headerType;
@@ -86,14 +87,14 @@ public class AfspHeader {
         List<AfspHeader> headerList = new ArrayList<>();
         StringBuilder requestBuffer = new StringBuilder();
         int _byte;
-        boolean crlfFound = false;
         //Start reading the incoming stream
         while ((_byte = reader.read()) >= 0) {
+            LOGGER.info(requestBuffer.toString());
             if (_byte == ByteCode.CR.code) {
                 //check for lineFeed;
                 _byte = reader.read();
                 if (_byte == ByteCode.LF.code) {
-                    if (headerList.isEmpty()){
+                    if (headerList.isEmpty() && requestBuffer.isEmpty()){
                         requestBuffer.delete(0, requestBuffer.length());
                         message.setHeaderList(headerList);
                         return headerList;

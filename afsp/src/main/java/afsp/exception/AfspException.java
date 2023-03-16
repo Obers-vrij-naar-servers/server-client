@@ -1,9 +1,11 @@
-package afsp;
+package afsp.exception;
 
-public class AfspParsingException extends Exception{
+import afsp.AfspStatusCode;
+
+public class AfspException extends Exception{
     private AfspStatusCode errorCode;
 
-    public AfspParsingException(AfspStatusCode errorCode) {
+    public AfspException(AfspStatusCode errorCode) {
         super(errorCode.MESSAGE);
         this.errorCode = errorCode;
     }

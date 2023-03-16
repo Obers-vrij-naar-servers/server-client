@@ -21,14 +21,14 @@ public class AfspServer {
 
         LOGGER.info("Using Port: " + conf.getPort());
         LOGGER.info("Using Folder: " + conf.getFolder());
+            try {
+                System.out.println("Starting ListenerThread");
+                ServerListenerThread serverListenerThread = new ServerListenerThread(conf.getPort());
+                serverListenerThread.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+                //TODO handle error
+            }
 
-        try {
-            System.out.println("Starting ListenerThread");
-            ServerListenerThread serverListenerThread = new ServerListenerThread(conf.getPort(), conf.getFolder());
-            serverListenerThread.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-            //TODO handle error
-        }
     }
 }

@@ -1,15 +1,20 @@
 package afsp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AfspMessage {
-    private List<AfspHeader> headerList;
+
+    protected final static Logger LOGGER = LoggerFactory.getLogger(AfspResponse.class);
+    protected List<AfspHeader> headerList;
     public void addHeader(AfspHeader header){
-        if(headerList == null){
-            headerList = new ArrayList<>();
+        if(this.headerList == null){
+            this.headerList = new ArrayList<>();
         }
-        headerList.add(header);
+        this.headerList.add(header);
     }
 
     public List<AfspHeader> getHeaderList() {
