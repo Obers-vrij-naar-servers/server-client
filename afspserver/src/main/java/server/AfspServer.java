@@ -17,7 +17,7 @@ public class AfspServer {
     public static void main(String[] args){
         LOGGER.info("Server Starting...");
 
-        ConfigurationManager.getInstance().loadConfigurationFile("C:\\school\\obers\\afspserver\\src\\main\\resources\\config.json");
+        ConfigurationManager.getInstance().loadConfigurationFile("/home/jeroen/Documents/school/jaar3/blok3/server-client/afspserver/src/main/resources/config.json");
         Configuration conf = ConfigurationManager.getInstance().getCurrentConfiguration();
 
         LOGGER.info("Using Port: " + conf.getPort());

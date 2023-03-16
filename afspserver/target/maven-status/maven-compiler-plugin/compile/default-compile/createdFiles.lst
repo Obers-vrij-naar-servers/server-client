@@ -1,7 +1,0 @@
-server\AfspServer.class
-core\ServerListenerThread.class
-core\AfspConnectionWorkerThread.class
-config\Configuration.class
-config\ConfigurationManager.class
-config\AfspConfigurationException.class
-core\RequestHandler.class

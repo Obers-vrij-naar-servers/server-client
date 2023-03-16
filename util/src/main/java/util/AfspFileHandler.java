@@ -20,7 +20,9 @@ public class AfspFileHandler {
         localFileDir = folder;
         System.out.println("File handler created");
         File file = new File(localFileDir);
-        fileList = Arrays.asList(file.list());
+        if (file.isDirectory() && file.exists()){
+            fileList = Arrays.asList(file.list());
+        }
     }
 
     public List<String> getFileList() throws AfspResponseException {
