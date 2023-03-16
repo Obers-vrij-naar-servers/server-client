@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>obers</groupId>
+        <artifactId>obers</artifactId>
+        <version>obers-1</version>
+    </parent>
+
+    <name>afspserver</name>
+    <artifactId>afspserver</artifactId>
+    <packaging>jar</packaging>
+    <version>obers-1</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputDirectory>./build</outputDirectory>
+                    <finalName>afspserver</finalName>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <archive>
+                        <manifest>
+                            <mainClass>server.AfspServer</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--Dependencies-->
+    <dependencies>
+        <dependency>
+            <groupId>obers</groupId>
+            <artifactId>afsp</artifactId>
+            <version>obers-1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>obers</groupId>
+            <artifactId>util</artifactId>
+            <version>obers-1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+</project>
+<!-- NOTES-->
+<!--FileChannel-->
