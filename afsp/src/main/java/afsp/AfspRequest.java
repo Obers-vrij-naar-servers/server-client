@@ -14,7 +14,7 @@ public class AfspRequest extends AfspMessage {
 
     };
 
-    AfspMethod getMethod() {
+    public AfspMethod getMethod() {
         return method;
     }
 
@@ -51,6 +51,11 @@ public class AfspRequest extends AfspMessage {
         }
         this.requestTarget = requestTarget;
     }
-
+    public String getTarget(){
+        if (this.requestTarget != null){
+            return this.requestTarget;
+        }
+        return "/";
+    }
 
 }

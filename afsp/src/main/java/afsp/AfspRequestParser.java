@@ -52,8 +52,6 @@ public class AfspRequestParser {
                 //check for lineFeed;
                 _byte = reader.read();
                 if (_byte == ByteCode.LF.code) {
-                    LOGGER.debug("Request Line to process : {}", requestBuffer.toString());
-
                     //only support AFSP/1.0
                     if (!requestBuffer.toString().equals(AfspProtocolVersion.AFSP_1_0.toString())) {
                         throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
@@ -68,11 +66,9 @@ public class AfspRequestParser {
             }
             if (_byte == ByteCode.SP.code) {
                 if (!methodParsed) {
-                    LOGGER.debug("Request Line METHOD to process : {}", requestBuffer.toString());
                     request.setMethod(requestBuffer.toString());
                     methodParsed = true;
                 } else if (!targetParsed) {
-                    LOGGER.debug("Request Line TARGET to process : {}", requestBuffer.toString());
                     request.setRequestTarget(requestBuffer.toString());
                     targetParsed = true;
                 } else {

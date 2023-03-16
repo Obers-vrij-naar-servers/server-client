@@ -1,7 +1,11 @@
 package client;
 
+import afsp.AfspParsingException;
 import afsp.AfspResponse;
+import afsp.AfspResponseException;
 import afsp.AfspResponseParser;
+import util.Helper;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,9 +35,19 @@ public class AfspClient {
                     "Content-length: 100\r\n"+
                     "Content-length: 500\r\n\r\n";
             out.write(rawDataString.getBytes());
-            AfspResponse response = parser.parseResponse(in);
-            in.close();
-            out.close();
+            try{
+                AfspResponse response = parser.parseResponse(in);
+                System.out.println(response.toString());
+            } catch (AfspParsingException | AfspResponseException e) {
+                e.printStackTrace();
+            }
+
+
+
+
+
+
+            Helper.closeConnections(in,out,socket);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

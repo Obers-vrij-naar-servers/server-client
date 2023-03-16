@@ -83,11 +83,7 @@ class AfspParserTest {
 
     private InputStream generateValidGETTestCase() {
         String rawDataString = "GET /hello.htm AFSP/1.0\r\n" +
-                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
-                "Host: www.tutorialspoint.com\r\n" +
-                "Accept-Language: en-us\r\n" +
-                "Accept-Encoding: gzip, deflate\r\n" +
-                "Connection: Keep-Alive";
+                "Content-length: 8192\r\n";
         InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
         return inputStream;
     }

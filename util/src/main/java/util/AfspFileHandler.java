@@ -1,20 +1,21 @@
 package util;
 
 import afsp.AfspResponseException;
+import afsp.AfspResponseParser;
 import afsp.AfspStatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 public class AfspFileHandler {
+    private final Logger LOGGER = LoggerFactory.getLogger(AfspFileHandler.class);
 
     private String localFileDir;
     private List<String> fileList;
 
-//    public AfspFileHandler() {
-//        this(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-//    }
 
     public AfspFileHandler(String folder) {
         localFileDir = folder;
@@ -29,6 +30,9 @@ public class AfspFileHandler {
         if (fileList == null || fileList.size() == 0){
             throw new AfspResponseException(AfspStatusCode.CLIENT_ERROR_404_NOT_FOUND);
         }
+//        for (String fileName : fileList){
+//            LOGGER.debug("** "+fileName+" **");
+//        }
         return fileList;
     }
 }
