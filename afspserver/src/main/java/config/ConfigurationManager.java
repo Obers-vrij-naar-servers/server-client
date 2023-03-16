@@ -32,13 +32,13 @@ public class ConfigurationManager {
      * @param filePath
      */
     public void loadConfigurationFile(String filePath) {
-        FileReader fileReader = null;
+        FileReader fileReader;
         try {
             fileReader = new FileReader(filePath);
         } catch (FileNotFoundException e) {
             throw new AfspConfigurationException(e);
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int i;
         while (true){
             try {

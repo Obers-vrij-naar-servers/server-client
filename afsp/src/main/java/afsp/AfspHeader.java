@@ -14,7 +14,7 @@ public class AfspHeader {
     private HeaderType headerType;
     private String headerContent;
 
-    AfspHeader(HeaderType headerType) {
+    public AfspHeader(HeaderType headerType) {
         this.headerType = headerType;
     }
     AfspHeader(String headerName) throws AfspParsingException{
@@ -43,7 +43,7 @@ public class AfspHeader {
         this.headerContent = headerContent;
     }
 
-    enum HeaderType {
+    public enum HeaderType {
         CONTENT_LENGTH{
             @Override
             public String toString() {
@@ -81,8 +81,8 @@ public class AfspHeader {
             }
         }
     }
-    static List<AfspHeader> parseHeaders(InputStreamReader reader, AfspMessage request) throws IOException, AfspParsingException {
-        LOGGER.debug(" ** Parsing Headers ** ");
+    static List<AfspHeader> parseHeaders(InputStreamReader reader, AfspMessage message) throws IOException, AfspParsingException {
+        LOGGER.debug(" ** PARSING HEADERS ** ");
         List<AfspHeader> headerList = new ArrayList<>();
         StringBuilder requestBuffer = new StringBuilder();
         int _byte;
@@ -93,6 +93,11 @@ public class AfspHeader {
                 //check for lineFeed;
                 _byte = reader.read();
                 if (_byte == ByteCode.LF.code) {
+                    if (headerList.isEmpty()){
+                        requestBuffer.delete(0, requestBuffer.length());
+                        message.setHeaderList(headerList);
+                        return headerList;
+                    }
                     //check for double CRLF
                     _byte = reader.read();
                     if (_byte == ByteCode.CR.code) {
@@ -101,7 +106,7 @@ public class AfspHeader {
                         if (_byte == ByteCode.LF.code) {
                             headerList.get(headerList.size() - 1).setHeaderContent(requestBuffer.toString());
                             requestBuffer.delete(0, requestBuffer.length());
-                            request.setHeaderList(headerList);
+                            message.setHeaderList(headerList);
                             return headerList;
                         }
                     } else  // save header to local list{
