@@ -17,11 +17,11 @@ public class Configuration{
         this.port = port;
     }
 
-    public String getFolder() {
+    public String getHost() {
         return folder;
     }
 
-    public void setFolder(String folder) {
+    public void setHost(String folder) {
         this.folder = folder;
     }
 }

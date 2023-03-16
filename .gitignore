@@ -1,4 +1,14 @@
 .idea
-afspclient/build
+
 afspserver/build
+afspserver/target
+
+afspclient/build
+afspclient/target
+
+afsp/build
+afsp/target
+
+util/target
+util/build
 
