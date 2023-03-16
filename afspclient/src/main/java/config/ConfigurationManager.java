@@ -1,13 +1,5 @@
 package config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import util.Json;
-
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class ConfigurationManager {
 
     /**
@@ -35,7 +27,7 @@ public class ConfigurationManager {
     public void initConfiguration(String[] args) {
 
         int port = -1;
-        String targetFolder = "";
+        String host = "";
 
         for (String arg : args) {
             if (arg.startsWith("--port=")) {
@@ -47,13 +39,13 @@ public class ConfigurationManager {
                 }
             }
 
-            if (arg.startsWith("--folder=")) {
-                targetFolder = arg.substring(arg.lastIndexOf("=") + 1);
+            if (arg.startsWith("--host=")) {
+                host = arg.substring(arg.lastIndexOf("=") + 1);
             }
         }
 
-        if (targetFolder.isEmpty()) {
-            System.out.println("Please provide a folder location for retrieving files, hint don't forgot to use --folder=");
+        if (host.isEmpty()) {
+            System.out.println("Please provide a valid host, hint don't forgot to use --host=");
             System.exit(1);
         }
 
@@ -62,7 +54,7 @@ public class ConfigurationManager {
             System.exit(1);
         }
 
-        myCurrentConfiguration = new Configuration(port, targetFolder);
+        myCurrentConfiguration = new Configuration(port, host);
     }
 
     /**
