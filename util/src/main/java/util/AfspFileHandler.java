@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,14 +59,21 @@ public class AfspFileHandler {
         LOGGER.info("** FILEPATH: "+this.localFileDir +"/"+fileName+"**");
         Path path = Paths.get(this.localFileDir +"/"+fileName);
         long fileSize;
+        long identifier;
         try{
             fileSize = Files.size(path);
+            identifier = Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime().toMillis();
         } catch (IOException e){
             throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
         LOGGER.info("** FILE-SIZE: "+fileSize+" **");
-
+        LOGGER.info("** IDENTIFIER:"+" **");
+        var fileSizeHeader = new AfspHeader(AfspHeader.HeaderType.FILE_SIZE);
+        fileSizeHeader.setHeaderContent(String.valueOf(fileSize));
+        var identifierHeader = new AfspHeader(AfspHeader.HeaderType.IDENTIFIER);
+        identifierHeader.setHeaderContent(String.valueOf(identifier));
+        headers.add(fileSizeHeader);
+        headers.add(identifierHeader);
         return headers;
-
     }
 }

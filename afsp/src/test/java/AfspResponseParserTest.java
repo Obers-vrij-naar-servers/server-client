@@ -76,7 +76,7 @@ public class AfspResponseParserTest {
             assertEquals(AfspStatusCode.SERVER_SUCCESS_200_OK.STATUS_CODE,response.getStatusCode());
             assertEquals(2,response.getHeaderList().size());
             assertEquals("this is the body",response.getBody());
-        }createValidListResponseWithNoHeadersAndABody
+        }
         catch (AfspResponseException | AfspParsingException e){
             fail(e);
         }

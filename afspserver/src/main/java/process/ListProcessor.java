@@ -7,6 +7,8 @@ import afsp.exception.AfspProcessingException;
 import afsp.exception.AfspResponseException;
 import util.AfspFileHandler;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class ListProcessor extends RequestProcessor{
@@ -15,6 +17,7 @@ public class ListProcessor extends RequestProcessor{
     private final AfspFileHandler fileHandler = new AfspFileHandler("/home/jeroen/Documents/school/jaar3/blok3/server/serverFileFolder");
 
     public ListProcessor(AfspRequest request, AfspResponse response){
+        LOGGER.info("** LISTPROCESSOR STARTED **");
         this.request = request;
         this.response = response;
     }
@@ -38,7 +41,8 @@ public class ListProcessor extends RequestProcessor{
             response.addHeader(contentLengthHeader);
             response.setBody(bodyString);
         } else {
-            response.setHeaderList(fileHandler.getFileInfo(request.getTarget()));
+            var fileListHeaders = fileHandler.getFileInfo(request.getTarget());
+            response.setHeaderList(fileListHeaders);
         }
     }
 }

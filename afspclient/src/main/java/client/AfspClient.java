@@ -37,10 +37,9 @@ public class AfspClient {
             Socket socket = new Socket(conf.getHost(), conf.getPort());
             OutputStream out = socket.getOutputStream();
             InputStream in = socket.getInputStream();
-            StringBuilder responseBuffer = new StringBuilder();
             AfspResponseParser parser = new AfspResponseParser();
 
-            String rawDataString = "LIST /requirements.pdf AFSP/1.0\r\n";
+            String rawDataString = "LIST Requirements.pdf AFSP/1.0\r\n\r\n";
             out.write(rawDataString.getBytes());
             try{
                 AfspResponse response = parser.parseResponse(in);

@@ -64,7 +64,7 @@ public class AfspResponseParser {
                     for (AfspProtocolVersion _version : AfspProtocolVersion.values()){
                         if (_version.toString().equals(_protocol)){
                             _supported = true;
-                            continue;
+                            break;
                         }
                     }
                     if (!_supported){
