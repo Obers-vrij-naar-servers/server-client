@@ -1,5 +1,6 @@
 package afsp;
 
+import afsp.exception.AfspParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +18,10 @@ public class AfspHeader {
     public AfspHeader(HeaderType headerType) {
         this.headerType = headerType;
     }
-    AfspHeader(String headerName) throws AfspParsingException{
-        for(HeaderType _headerType: HeaderType.values()){
-            if(headerName.equals(_headerType.toString())){
+
+    AfspHeader(String headerName) throws AfspParsingException {
+        for (HeaderType _headerType : HeaderType.values()) {
+            if (headerName.equals(_headerType.toString())) {
                 this.headerType = _headerType;
                 return;
             }
@@ -30,7 +32,7 @@ public class AfspHeader {
 
     }
 
-    public HeaderType getHeaderType(){
+    public HeaderType getHeaderType() {
         return headerType;
     }
 
@@ -44,56 +46,57 @@ public class AfspHeader {
     }
 
     public enum HeaderType {
-        CONTENT_LENGTH{
+        CONTENT_LENGTH {
             @Override
             public String toString() {
                 return "Content-length";
             }
         },
-        CHARSET{
+        CHARSET {
             @Override
-            public String toString(){
+            public String toString() {
                 return "Charset";
             }
         },
-        BUFFER_SIZE{
+        BUFFER_SIZE {
             @Override
             public String toString() {
                 return "Buffer-Size";
             }
         },
-        TIME_OUT{
+        TIME_OUT {
             @Override
             public String toString() {
                 return "Time-out";
             }
         },
-        FILE_SIZE{
+        FILE_SIZE {
             @Override
             public String toString() {
                 return "File-Size";
             }
         },
-        IDENTIFIER{
+        IDENTIFIER {
             @Override
             public String toString() {
                 return "Identifier";
             }
         }
     }
+
     static List<AfspHeader> parseHeaders(InputStreamReader reader, AfspMessage message) throws IOException, AfspParsingException {
         LOGGER.debug(" ** PARSING HEADERS ** ");
         List<AfspHeader> headerList = new ArrayList<>();
         StringBuilder requestBuffer = new StringBuilder();
         int _byte;
-        boolean crlfFound = false;
         //Start reading the incoming stream
         while ((_byte = reader.read()) >= 0) {
             if (_byte == ByteCode.CR.code) {
                 //check for lineFeed;
                 _byte = reader.read();
                 if (_byte == ByteCode.LF.code) {
-                    if (headerList.isEmpty()){
+                    if (headerList.isEmpty() && requestBuffer.isEmpty()) {
+                        LOGGER.debug(" ** PARSING HEADERS DONE** ");
                         requestBuffer.delete(0, requestBuffer.length());
                         message.setHeaderList(headerList);
                         return headerList;
@@ -104,6 +107,7 @@ public class AfspHeader {
                         _byte = reader.read();
                         //end of headers, save headerList to request and exit parsing headers
                         if (_byte == ByteCode.LF.code) {
+                            LOGGER.debug(" ** PARSING HEADERS DONE** ");
                             headerList.get(headerList.size() - 1).setHeaderContent(requestBuffer.toString());
                             requestBuffer.delete(0, requestBuffer.length());
                             message.setHeaderList(headerList);
@@ -111,9 +115,9 @@ public class AfspHeader {
                         }
                     } else  // save header to local list{
                         headerList.get(headerList.size() - 1).setHeaderContent(requestBuffer.toString());
-                        requestBuffer.delete(0, requestBuffer.length());
-                    }
+                    requestBuffer.delete(0, requestBuffer.length());
                 }
+            }
             //validate HeaderType
             if (_byte == ByteCode.COL.code) {
                 String currentHeaderType = requestBuffer.toString();
@@ -130,6 +134,10 @@ public class AfspHeader {
                     throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
                 headerList.add(new AfspHeader(currentHeaderType));
+                _byte = reader.read();
+                if (_byte != ByteCode.SP.code) {
+                    throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                }
             } else {
                 requestBuffer.append((char) _byte);
             }

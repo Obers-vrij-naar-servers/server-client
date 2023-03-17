@@ -1,5 +1,7 @@
 package afsp;
 
+import afsp.exception.AfspParsingException;
+
 import java.util.List;
 
 public class AfspRequest extends AfspMessage {

@@ -15,34 +15,25 @@ public class ServerListenerThread extends Thread {
     private String webroot;
     private ServerSocket serverSocket;
 
-    public ServerListenerThread(int port, String webroot) throws IOException {
+    public ServerListenerThread(int port) throws IOException {
         this.port = port;
-        this.webroot = webroot;
         serverSocket = new ServerSocket(this.port);
     }
 
     @Override
     public void run() {
-
-        try {
-            while (serverSocket.isBound() && !serverSocket.isClosed()) {
+        while (true){
+            try {
                 Socket socket = serverSocket.accept();
-
                 LOGGER.info(" * Connection accepted: " + socket.getInetAddress() + " * ");
                 AfspConnectionWorkerThread workerThread = new AfspConnectionWorkerThread(socket);
                 workerThread.start();
 
                 //serverSocket.close();
                 //TODO HANDLE close
-            }
 
-        } catch (IOException e) {
-            LOGGER.error("Error in listenerThread", e);
-        } finally {
-            if (serverSocket != null) {
-                try {
-                    serverSocket.close();
-                } catch (IOException e) {}
+            } catch (IOException e) {
+                LOGGER.error("Error in listenerThread", e);
             }
         }
     }

@@ -1,5 +1,6 @@
 package afsp;
 
+import afsp.exception.AfspParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,18 +22,23 @@ public class AfspRequestParser {
 
         try {
             parseRequestLine(reader, request);
+            LOGGER.info(" ** RequestLine Parsed ** ");
         } catch (IOException e) {
             throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
 
         try {
             AfspHeader.parseHeaders(reader, request);
+            LOGGER.info(" ** HEADERS Parsed ** ");
         } catch (IOException e) {
             throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
-
-        parseBody(reader, request);
-
+        try{
+            parseBody(reader, request);
+            LOGGER.info(" ** BODY Parsed ** ");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         return request;
     }
 

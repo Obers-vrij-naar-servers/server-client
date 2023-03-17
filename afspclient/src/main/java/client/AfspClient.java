@@ -1,8 +1,8 @@
 package client;
 
-import afsp.AfspParsingException;
+import afsp.exception.AfspParsingException;
 import afsp.AfspResponse;
-import afsp.AfspResponseException;
+import afsp.exception.AfspResponseException;
 import afsp.AfspResponseParser;
 import config.Configuration;
 import config.ConfigurationManager;
@@ -37,13 +37,9 @@ public class AfspClient {
             Socket socket = new Socket(conf.getHost(), conf.getPort());
             OutputStream out = socket.getOutputStream();
             InputStream in = socket.getInputStream();
-            StringBuilder responseBuffer = new StringBuilder();
             AfspResponseParser parser = new AfspResponseParser();
 
-            String rawDataString = "LIST / AFSP/1.0\r\n" +
-                    "Content-length: 8192\r\n"+
-                    "Content-length: 100\r\n"+
-                    "Content-length: 500\r\n\r\n";
+            String rawDataString = "LIST Requirements.pdf AFSP/1.0\r\n\r\n";
             out.write(rawDataString.getBytes());
             try{
                 AfspResponse response = parser.parseResponse(in);

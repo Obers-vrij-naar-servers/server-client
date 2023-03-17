@@ -1,5 +1,7 @@
 package afsp;
 
+import afsp.exception.AfspParsingException;
+import afsp.exception.AfspResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +64,7 @@ public class AfspResponseParser {
                     for (AfspProtocolVersion _version : AfspProtocolVersion.values()){
                         if (_version.toString().equals(_protocol)){
                             _supported = true;
-                            continue;
+                            break;
                         }
                     }
                     if (!_supported){

@@ -1,6 +1,7 @@
 package core;
 
 import afsp.*;
+import afsp.exception.AfspParsingException;
 import config.ConfigurationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,6 @@ import process.ListProcessor;
 import util.AfspFileHandler;
 import util.Helper;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -53,20 +53,8 @@ public class AfspConnectionWorkerThread extends Thread {
                 var processor = new ListProcessor(request,response);
                 processor.process();
             }//Send response
-            LOGGER.warn("SERVER RESPONSE:\n" +response.toString());
+            LOGGER.info("Response:\n"+response);
             outputStream.write(response.toString().getBytes());
-
-            //TODO writing
-//            String html = "<html><head><title>Title</title></head><body><h1>hi!</h1></body></html>";
-//            final String CRLF = "\n\r"; //13,10 ASCII
-//            String response = "HTTP/1.1 200 OK " + CRLF +
-//                    "Content-Length: " + html.getBytes().length + CRLF +
-//                    CRLF +
-//                    html +
-//                    CRLF + CRLF;
-//
-//            outputStream.write(response.getBytes());
-
 
             LOGGER.info(" * Connection processing finished...");
         } catch (Exception e) {
