@@ -4,6 +4,7 @@ import afsp.exception.AfspParsingException;
 import afsp.AfspResponse;
 import afsp.exception.AfspResponseException;
 import afsp.AfspResponseParser;
+import afsp.util.Utils;
 import config.Configuration;
 import config.ConfigurationManager;
 import org.slf4j.Logger;
@@ -24,7 +25,6 @@ public class AfspClient {
     public static void main(String[] args) {
         LOGGER.info("Client Starting...");
 
-        var client = new AfspClient();
 
         ConfigurationManager.getInstance().initConfiguration(args);
         Configuration conf = ConfigurationManager.getInstance().getCurrentConfiguration();
@@ -38,8 +38,11 @@ public class AfspClient {
             OutputStream out = socket.getOutputStream();
             InputStream in = socket.getInputStream();
             AfspResponseParser parser = new AfspResponseParser();
+            String target = "/";
+//            String target = "(Malazan Book of the Fallen 4) Erikson, Steven - A Malazan Book of the Fallen Collection 4.epub";
+            target = Utils.encodeString(target);
+            String rawDataString = "LIST "+target+" AFSP/1.0\r\n\r\n";
 
-            String rawDataString = "LIST Requirements.pdf AFSP/1.0\r\n\r\n";
             out.write(rawDataString.getBytes());
             try{
                 AfspResponse response = parser.parseResponse(in);
@@ -50,7 +53,7 @@ public class AfspClient {
             Helper.closeConnections(in,out,socket);
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Could not connect to server");
         }
     }
 

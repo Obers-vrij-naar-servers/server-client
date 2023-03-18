@@ -1,6 +1,8 @@
 package afsp;
 
 import afsp.exception.AfspParsingException;
+import afsp.util.ByteCode;
+import afsp.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +77,9 @@ public class AfspRequestParser {
                     request.setMethod(requestBuffer.toString());
                     methodParsed = true;
                 } else if (!targetParsed) {
-                    request.setRequestTarget(requestBuffer.toString());
+                    String encodedTarget = requestBuffer.toString();
+                    String decodedTarget = Utils.decodeString(encodedTarget);
+                    request.setRequestTarget(decodedTarget);
                     targetParsed = true;
                 } else {
                     throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);

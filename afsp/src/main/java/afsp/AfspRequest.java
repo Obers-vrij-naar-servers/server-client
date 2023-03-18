@@ -2,6 +2,7 @@ package afsp;
 
 import afsp.exception.AfspParsingException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AfspRequest extends AfspMessage {
@@ -58,6 +59,20 @@ public class AfspRequest extends AfspMessage {
             return this.requestTarget;
         }
         return "/";
+    }
+
+    public boolean containsHeaders(AfspHeader.HeaderType... headerTypes){
+        List<Boolean> conformationList = new ArrayList();
+        for (AfspHeader.HeaderType headerType : headerTypes){
+            for (AfspHeader header: this.headerList){
+                if (header.getHeaderType().equals(headerType)) {
+                    conformationList.add(true);
+                    break;
+                }
+            }
+            conformationList.add(true);
+        }
+        return !conformationList.contains(false);
     }
 
 }

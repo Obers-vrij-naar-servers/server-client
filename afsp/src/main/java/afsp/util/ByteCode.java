@@ -1,4 +1,6 @@
-package afsp;
+package afsp.util;
+
+import java.nio.file.FileSystems;
 
 public enum ByteCode {
     SP(0x20),
