@@ -19,11 +19,11 @@ public class AfspServer {
         ConfigurationManager.getInstance().initConfiguration(args);
         Configuration conf = ConfigurationManager.getInstance().getCurrentConfiguration();
 
-        LOGGER.info("Using Port: " + conf.getPort());
-        LOGGER.info("Using Folder: " + conf.getFolder());
+        LOGGER.info("Using Port: " + conf.port());
+        LOGGER.info("Using Folder: " + conf.folder());
             try {
                 System.out.println("Starting ListenerThread");
-                ServerListenerThread serverListenerThread = new ServerListenerThread(conf.getPort());
+                ServerListenerThread serverListenerThread = new ServerListenerThread(conf.port());
                 serverListenerThread.start();
             } catch (Exception e) {
                 e.printStackTrace();

@@ -42,42 +42,33 @@ public class AfspResponse extends AfspMessage{
     }
 
 
-    private String printHeaders(){
-        if (headerList == null || headerList.isEmpty()) {
-            LOGGER.debug("headerList EMPTY");
-            return "\r\n";
-        }
-        String headerString = "";
 
-            for (AfspHeader _header : headerList) {
-                headerString += _header.getHeaderType().toString() + ": " + _header.getHeaderContent() + "\r\n";
-            }
-
-        return headerString+"\r\n";
-    }
 
     public int getStatusCode() {
         return statusCode;
     }
 
-    public void setStatusCode(int statusCode) {
+    public AfspResponse setStatusCode(int statusCode) {
         this.statusCode = statusCode;
+        return this;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public AfspResponse setMessage(String message) {
         this.message = message;
+        return this;
     }
 
     public List<AfspHeader> getheaderList() {
         return headerList;
     }
 
-    public void setheaderList(List<AfspHeader> headerList) {
+    public AfspResponse setheaderList(List<AfspHeader> headerList) {
         this.headerList = headerList;
+        return this;
     }
 
     public String getBody() {
@@ -87,7 +78,8 @@ public class AfspResponse extends AfspMessage{
         return body;
     }
 
-    public void setBody(String body) {
+    public AfspResponse setBody(String body) {
         this.body = body;
+        return this;
     }
 }

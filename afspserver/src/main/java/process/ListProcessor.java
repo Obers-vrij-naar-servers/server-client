@@ -4,17 +4,14 @@ import afsp.AfspHeader;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
 import afsp.exception.AfspProcessingException;
-import afsp.exception.AfspResponseException;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 public class ListProcessor extends RequestProcessor{
 
-    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().folder());
 
     public ListProcessor(AfspRequest request, AfspResponse response){
         super(request,response);

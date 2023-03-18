@@ -13,6 +13,8 @@ public abstract class RequestProcessor{
     protected AfspRequest request;
     protected AfspResponse response;
 
+    public boolean done = false;
+
     public RequestProcessor(AfspRequest request, AfspResponse response) {
         this.request = request;
         this.response = response;

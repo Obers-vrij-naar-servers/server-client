@@ -42,8 +42,10 @@ public class AfspHeader {
         return headerContent;
     }
 
-    public void setHeaderContent(String headerContent) {
+    public AfspHeader setHeaderContent(String headerContent) {
+
         this.headerContent = headerContent;
+        return this;
     }
 
     public enum HeaderType {

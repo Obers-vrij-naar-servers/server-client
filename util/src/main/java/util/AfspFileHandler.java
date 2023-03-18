@@ -69,10 +69,8 @@ public class AfspFileHandler {
         }
         LOGGER.info("** FILE-SIZE: "+fileSize+" **");
         LOGGER.info("** IDENTIFIER:"+" **");
-        var fileSizeHeader = new AfspHeader(AfspHeader.HeaderType.FILE_SIZE);
-        fileSizeHeader.setHeaderContent(String.valueOf(fileSize));
-        var identifierHeader = new AfspHeader(AfspHeader.HeaderType.IDENTIFIER);
-        identifierHeader.setHeaderContent(String.valueOf(identifier));
+        AfspHeader fileSizeHeader = new AfspHeader(AfspHeader.HeaderType.FILE_SIZE).setHeaderContent(String.valueOf(fileSize));
+        AfspHeader identifierHeader = new AfspHeader(AfspHeader.HeaderType.IDENTIFIER).setHeaderContent(String.valueOf(identifier));
         headers.add(fileSizeHeader);
         headers.add(identifierHeader);
         return headers;
@@ -93,10 +91,21 @@ public class AfspFileHandler {
         fileChannel.close();
     }
 
-    public void receiveFile(SocketChannel channel, long fileSize,String fileName){
+    public void receiveFile(SocketChannel channel, long fileSize,int bufferSize,String fileName) throws IOException {
 
-        //FileChannel fileChannel = FileChannel.open()
+        Path path = Path.of(getFullPath(fileName));
+        FileChannel fileChannel = FileChannel.open(path.toAbsolutePath(),StandardOpenOption.CREATE,StandardOpenOption.WRITE);
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
+        while ( channel.read(buffer)>0){
+            fileChannel.write(buffer);
+            buffer.clear();
+        }
+    }
+
+
+    private String getFullPath(String fileName){
+        return localFileDir + FileSystems.getDefault().getSeparator() + fileName;
     }
 
 
