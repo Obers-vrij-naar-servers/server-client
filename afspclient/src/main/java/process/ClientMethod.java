@@ -15,8 +15,4 @@ enum MenuOption {
     public String getLabel() {
         return label;
     }
-
-    public int getOptionText() {
-        return ordinal() + 1;
-    }
 }

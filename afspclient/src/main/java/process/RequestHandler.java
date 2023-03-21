@@ -20,7 +20,7 @@ public class RequestHandler {
         this.conf = conf;
     }
 
-    public boolean handle() {
+    public AfspResponse handle() {
         try {
             Socket socket = new Socket(conf.getHost(), conf.getPort());
             OutputStream out = socket.getOutputStream();
@@ -32,7 +32,7 @@ public class RequestHandler {
             try{
                 AfspResponse response = parser.parseResponse(in);
                 System.out.println(response.toString());
-                return true;
+                return response;
             } catch (AfspParsingException | AfspResponseException e) {
                 e.printStackTrace();
             }
@@ -42,6 +42,6 @@ public class RequestHandler {
             throw new RuntimeException(e);
         }
 
-        return false;
+        return null;
     }
 }

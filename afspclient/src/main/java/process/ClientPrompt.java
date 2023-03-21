@@ -19,11 +19,7 @@ public class ClientPrompt {
             prompt();
 
             if(selectedMenuOption != null) {
-                //TODO make a real response
-                var response = requestHandler.handle();
-                if(response) {
-                    selectedMenuOption = null;
-                }
+                requestHandler.handle();
             }
 
             this.firstPrompt = false;
@@ -41,7 +37,7 @@ public class ClientPrompt {
         }
 
         for (int i = 0; i < options.length; i++) {
-            System.out.println((i + 1) + ". " + options[i].getOptionText());
+            System.out.println((i + 1) + ". " + options[i].getLabel());
         }
 
         Scanner scanner = new Scanner(System.in);
@@ -64,6 +60,6 @@ public class ClientPrompt {
         }
 
         this.selectedMenuOption = options[selectedOption - 1];
-        System.out.println("You selected: " + selectedMenuOption.getOptionText());
+        System.out.println("You selected: " + selectedMenuOption.getLabel());
     }
 }
