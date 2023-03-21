@@ -28,6 +28,7 @@ public class ConfigurationManager {
 
         int port = -1;
         String host = "";
+        boolean debug = false;
 
         for (String arg : args) {
             if (arg.startsWith("--port=")) {
@@ -42,6 +43,10 @@ public class ConfigurationManager {
             if (arg.startsWith("--host=")) {
                 host = arg.substring(arg.lastIndexOf("=") + 1);
             }
+
+            if ("--debug=true".equals(arg)) {
+                debug = true;
+            }
         }
 
         if (host.isEmpty()) {
@@ -54,7 +59,13 @@ public class ConfigurationManager {
             System.exit(1);
         }
 
-        myCurrentConfiguration = new Configuration(port, host);
+        if (debug) {
+            System.setProperty("debug", "true");
+        } else {
+            System.setProperty("debug", "false");
+        }
+
+        myCurrentConfiguration = new Configuration(port, host, debug);
     }
 
     /**

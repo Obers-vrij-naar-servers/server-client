@@ -52,6 +52,13 @@
 
     <!--Dependencies-->
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.codehaus.janino/janino -->
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>3.1.9</version>
+        </dependency>
+
         <dependency>
             <groupId>obers</groupId>
             <artifactId>afsp</artifactId>
