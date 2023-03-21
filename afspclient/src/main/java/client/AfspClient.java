@@ -5,7 +5,7 @@ import config.ConfigurationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import process.ClientPrompt;
+import process.Prompt;
 
 import static util.LoggerConfiguration.reloadLogbackConfiguration;
 
@@ -27,8 +27,8 @@ public class AfspClient {
         LOGGER.info("Using Folder: " + conf.getFolder());
         LOGGER.info("Using Host: " + conf.getHost());
 
-        ClientPrompt clientPrompt = new ClientPrompt(conf);
+        Prompt prompt = new Prompt(conf);
 
-        clientPrompt.start();
+        prompt.start();
     }
 }
