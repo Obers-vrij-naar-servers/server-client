@@ -1,6 +1,6 @@
 package process;
 
-enum MenuOption {
+enum method {
     SHOW_ALL_FILES("Show all files"),
     SYNC_FILES_TO_LOCAL_FOLDER("Sync files to local folder"),
     UPLOAD_FILES_TO_SERVER("Upload files to server"),
@@ -8,7 +8,7 @@ enum MenuOption {
 
     private final String label;
 
-    MenuOption(String label) {
+    method(String label) {
         this.label = label;
     }
 

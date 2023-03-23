@@ -12,6 +12,9 @@ public class AfspRequest extends AfspMessage {
     private String requestTarget;
     private String protocol = AfspProtocolVersion.AFSP_1_0.toString();
 
+    private List<AfspHeader> headerList;
+
+
     public AfspRequest(){
 
     };
@@ -34,6 +37,7 @@ public class AfspRequest extends AfspMessage {
         }
         this.protocol = protocol;
     }
+
 
     public AfspRequest setMethod(String  methodName) throws AfspParsingException {
         for(AfspMethod _method: AfspMethod.values()){
