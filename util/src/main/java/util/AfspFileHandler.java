@@ -2,16 +2,15 @@ package util;
 
 import afsp.AfspHeader;
 import afsp.exception.AfspProcessingException;
-import afsp.exception.AfspResponseException;
 import afsp.AfspStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +42,10 @@ public class AfspFileHandler {
         }
         return fileList;
     }
+
+
     public List<AfspHeader> getFileInfo(String fileName) throws AfspProcessingException {
+
         List<AfspHeader> headers = new ArrayList<>();
         updateFileList();
         boolean fileExists = false;
@@ -56,7 +58,6 @@ public class AfspFileHandler {
         if (!fileExists){
             throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_404_NOT_FOUND);
         }
-        LOGGER.info("** FILEPATH: "+this.localFileDir +"/"+fileName+"**");
         Path path = Paths.get(this.localFileDir +"/"+fileName);
         long fileSize;
         long identifier;
@@ -68,12 +69,45 @@ public class AfspFileHandler {
         }
         LOGGER.info("** FILE-SIZE: "+fileSize+" **");
         LOGGER.info("** IDENTIFIER:"+" **");
-        var fileSizeHeader = new AfspHeader(AfspHeader.HeaderType.FILE_SIZE);
-        fileSizeHeader.setHeaderContent(String.valueOf(fileSize));
-        var identifierHeader = new AfspHeader(AfspHeader.HeaderType.IDENTIFIER);
-        identifierHeader.setHeaderContent(String.valueOf(identifier));
+        AfspHeader fileSizeHeader = new AfspHeader(AfspHeader.HeaderType.FILE_SIZE).setHeaderContent(String.valueOf(fileSize));
+        AfspHeader identifierHeader = new AfspHeader(AfspHeader.HeaderType.IDENTIFIER).setHeaderContent(String.valueOf(identifier));
         headers.add(fileSizeHeader);
         headers.add(identifierHeader);
         return headers;
     }
+
+    public void sendFile(String fileName, SocketChannel channel,int bufferSize) throws IOException {
+        LOGGER.info(" ** SENDING: " + localFileDir + FileSystems.getDefault().getSeparator() + fileName);
+        long bytesWritten = 0;
+        RandomAccessFile reader = new RandomAccessFile(localFileDir + FileSystems.getDefault().getSeparator() + fileName,"r");
+        FileChannel fileChannel = reader.getChannel();
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+
+        while (fileChannel.read(buffer) > 0){
+            channel.write(buffer);
+            bytesWritten += buffer.limit();
+            buffer.clear();
+        }
+        fileChannel.close();
+    }
+
+    public void receiveFile(SocketChannel channel, long fileSize,int bufferSize,String fileName) throws IOException {
+
+        Path path = Path.of(getFullPath(fileName));
+        FileChannel fileChannel = FileChannel.open(path.toAbsolutePath(),StandardOpenOption.CREATE,StandardOpenOption.WRITE);
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+
+        while ( channel.read(buffer)>0){
+            fileChannel.write(buffer);
+            buffer.clear();
+        }
+    }
+
+
+    private String getFullPath(String fileName){
+        return localFileDir + FileSystems.getDefault().getSeparator() + fileName;
+    }
+
+
+
 }

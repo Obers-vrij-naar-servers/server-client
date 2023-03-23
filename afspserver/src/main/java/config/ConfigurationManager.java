@@ -35,7 +35,7 @@ public class ConfigurationManager {
                 try {
                     port = Integer.parseInt(arg.substring(arg.lastIndexOf("=") + 1));
                 } catch (NumberFormatException e) {
-                    System.out.println("Port is not a number, hint don't forgot to use --port=");
+                    System.out.println("Port is not a number.\nHint don't forgot to use --port=");
                     System.exit(1);
                 }
             }
@@ -50,12 +50,12 @@ public class ConfigurationManager {
         }
 
         if (targetFolder.isEmpty()) {
-            System.out.println("Please provide a folder location for retrieving files, hint don't forgot to use --folder=");
+            System.out.println("Please provide a folder location for retrieving files.\nHint don't forgot to use --folder=");
             System.exit(1);
         }
 
         if (port == -1) {
-            System.out.println("Please provide a valid port, hint don't forgot to use --port=");
+            System.out.println("Please provide a valid port'\nHint don't forgot to use --port=");
             System.exit(1);
         }
 

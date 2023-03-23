@@ -4,22 +4,19 @@ import afsp.AfspHeader;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
 import afsp.exception.AfspProcessingException;
-import afsp.exception.AfspResponseException;
+import config.ConfigurationManager;
 import util.AfspFileHandler;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 public class ListProcessor extends RequestProcessor{
 
-    //TODO change folder to var
-    private final AfspFileHandler fileHandler = new AfspFileHandler("/home/jeroen/Documents/school/jaar3/blok3/server/serverFileFolder");
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().folder());
 
     public ListProcessor(AfspRequest request, AfspResponse response){
-        LOGGER.info("** LISTPROCESSOR STARTED **");
-        this.request = request;
-        this.response = response;
+        super(request,response);
+        LOGGER.info("** LIST_PROCESSOR STARTED **");
+
     }
 
     public void process() throws AfspProcessingException {
