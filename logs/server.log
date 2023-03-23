@@ -1,0 +1,24 @@
+2023-03-23 10:03:56,803 INFO [main] s.AfspServer [AfspServer.java:23] Server Starting...
+2023-03-23 10:03:56,805 INFO [main] s.AfspServer [AfspServer.java:24] Using Mode: Production
+2023-03-23 10:03:56,809 INFO [main] s.AfspServer [AfspServer.java:25] Using Port: 8080
+2023-03-23 10:03:56,809 INFO [main] s.AfspServer [AfspServer.java:26] Using Folder: /home/jeroen/Documents/school/jaar3/blok3/server/serverFileFolder
+2023-03-23 10:04:08,179 INFO [Thread-0] c.ServerListenerThread [ServerListenerThread.java:28]  * Connection accepted: /127.0.0.1 * 
+2023-03-23 10:04:08,181 INFO [Thread-1] c.AfspConnectionWorkerThread [AfspConnectionWorkerThread.java:37]  ** AFSP request received **
+2023-03-23 10:04:08,182 INFO [Thread-1] a.AfspRequestParser [AfspRequestParser.java:18] ** Start Parsing Request **
+2023-03-23 10:04:08,187 INFO [Thread-1] a.AfspRequestParser [AfspRequestParser.java:25]  ** RequestLine Parsed ** 
+2023-03-23 10:04:08,187 DEBUG [Thread-1] a.AfspHeader [AfspHeader.java:88]  ** PARSING HEADERS ** 
+2023-03-23 10:04:08,188 DEBUG [Thread-1] a.AfspHeader [AfspHeader.java:99]  ** PARSING HEADERS DONE** 
+2023-03-23 10:04:08,188 INFO [Thread-1] a.AfspRequestParser [AfspRequestParser.java:32]  ** HEADERS Parsed ** 
+2023-03-23 10:04:08,188 INFO [Thread-1] a.AfspRequestParser [AfspRequestParser.java:38]  ** BODY Parsed ** 
+2023-03-23 10:04:08,188 INFO [Thread-1] c.AfspConnectionWorkerThread [AfspConnectionWorkerThread.java:52]  ** PROCESSING LIST **
+2023-03-23 10:04:08,189 INFO [Thread-1] p.RequestProcessor [ListProcessor.java:20] ** LISTPROCESSOR STARTED **
+2023-03-23 10:04:08,193 INFO [Thread-1] u.AfspFileHandler [AfspFileHandler.java:59] ** FILEPATH: /home/jeroen/Documents/school/jaar3/blok3/server/serverFileFolder/Requirements.pdf**
+2023-03-23 10:04:08,197 INFO [Thread-1] u.AfspFileHandler [AfspFileHandler.java:69] ** FILE-SIZE: 77898 **
+2023-03-23 10:04:08,197 INFO [Thread-1] u.AfspFileHandler [AfspFileHandler.java:70] ** IDENTIFIER: **
+2023-03-23 10:04:08,207 INFO [Thread-1] c.AfspConnectionWorkerThread [AfspConnectionWorkerThread.java:56] Response:
+AFSP/1.0 200 OK
+File-Size: 77898
+Identifier: 1678356621111
+
+
+2023-03-23 10:04:08,207 INFO [Thread-1] c.AfspConnectionWorkerThread [AfspConnectionWorkerThread.java:59]  * Connection processing finished...

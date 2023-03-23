@@ -1,0 +1,16 @@
+2023-03-23 10:03:40,639 INFO [main] c.AfspClient [AfspClient.java:24] Client Starting...
+2023-03-23 10:03:40,642 INFO [main] c.AfspClient [AfspClient.java:25] Using Mode: Production
+2023-03-23 10:03:40,647 INFO [main] c.AfspClient [AfspClient.java:26] Using Port: 8080
+2023-03-23 10:03:40,648 INFO [main] c.AfspClient [AfspClient.java:27] Using Folder: localhost
+2023-03-23 10:03:40,648 INFO [main] c.AfspClient [AfspClient.java:28] Using Host: localhost
+2023-03-23 10:04:05,652 INFO [main] c.AfspClient [AfspClient.java:24] Client Starting...
+2023-03-23 10:04:05,654 INFO [main] c.AfspClient [AfspClient.java:25] Using Mode: Production
+2023-03-23 10:04:05,660 INFO [main] c.AfspClient [AfspClient.java:26] Using Port: 8080
+2023-03-23 10:04:05,660 INFO [main] c.AfspClient [AfspClient.java:27] Using Folder: localhost
+2023-03-23 10:04:05,661 INFO [main] c.AfspClient [AfspClient.java:28] Using Host: localhost
+2023-03-23 10:04:08,178 INFO [main] a.AfspResponseParser [AfspResponseParser.java:18] ** Start Parsing Response **
+2023-03-23 10:04:08,209 INFO [main] a.AfspResponseParser [AfspResponseParser.java:87] ** STATUSCODE PARSED: 200**
+2023-03-23 10:04:08,211 INFO [main] a.AfspResponseParser [AfspResponseParser.java:56] ** MESSAGE PARSED: OK**
+2023-03-23 10:04:08,212 DEBUG [main] a.AfspHeader [AfspHeader.java:88]  ** PARSING HEADERS ** 
+2023-03-23 10:04:08,214 DEBUG [main] a.AfspHeader [AfspHeader.java:110]  ** PARSING HEADERS DONE** 
+2023-03-23 10:04:08,214 INFO [main] a.AfspResponseParser [AfspResponseParser.java:108]  ** PARSING BODY **

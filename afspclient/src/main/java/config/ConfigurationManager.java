@@ -1,9 +1,5 @@
 package config;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 public class ConfigurationManager {
 
     /**
@@ -32,7 +28,7 @@ public class ConfigurationManager {
 
         int port = -1;
         String host = "";
-        String folder = "";
+        boolean debug = false;
 
         for (String arg : args) {
             if (arg.startsWith("--port=")) {
@@ -47,12 +43,9 @@ public class ConfigurationManager {
             if (arg.startsWith("--host=")) {
                 host = arg.substring(arg.lastIndexOf("=") + 1);
             }
-            if (arg.startsWith("--folder=")) {
-                folder = arg.substring(arg.lastIndexOf("=") + 1);
-                if (!Files.exists(Path.of(folder))){
-                    System.out.println("--folder does not exist");
-                    System.exit(1);
-                }
+
+            if ("--debug=true".equals(arg)) {
+                debug = true;
             }
         }
 
@@ -65,13 +58,14 @@ public class ConfigurationManager {
             System.out.println("Please provide a valid port, hint don't forgot to use --port=");
             System.exit(1);
         }
-        if (folder.isEmpty()) {
-            System.out.println("Please provide a valid folder, hint don't forgot to use --port=");
-            System.exit(1);
+
+        if (debug) {
+            System.setProperty("debug", "true");
+        } else {
+            System.setProperty("debug", "false");
         }
 
-
-        myCurrentConfiguration = new Configuration(port, host, folder);
+        myCurrentConfiguration = new Configuration(port, host, debug);
     }
 
     /**
