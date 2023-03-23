@@ -1,6 +1,7 @@
 package afsp;
 
 import afsp.exception.AfspParsingException;
+import afsp.util.ByteCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +42,10 @@ public class AfspHeader {
         return headerContent;
     }
 
-    public void setHeaderContent(String headerContent) {
+    public AfspHeader setHeaderContent(String headerContent) {
+
         this.headerContent = headerContent;
+        return this;
     }
 
     public enum HeaderType {

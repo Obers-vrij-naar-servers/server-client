@@ -21,7 +21,20 @@ public abstract class AfspMessage {
         return headerList;
     }
 
-    public void setHeaderList(List<AfspHeader> headerList) {
+    public AfspMessage setHeaderList(List<AfspHeader> headerList) {
         this.headerList = headerList;
+        return this;
+    }
+    String printHeaders(){
+        if (headerList == null || headerList.isEmpty()) {
+            return "\r\n";
+        }
+        String headerString = "";
+
+        for (AfspHeader _header : headerList) {
+            headerString += _header.getHeaderType().toString() + ": " + _header.getHeaderContent() + "\r\n";
+        }
+
+        return headerString+"\r\n";
     }
 }

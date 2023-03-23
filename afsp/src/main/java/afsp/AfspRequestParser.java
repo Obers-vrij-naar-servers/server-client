@@ -1,8 +1,11 @@
 package afsp;
 
 import afsp.exception.AfspParsingException;
+import afsp.util.ByteCode;
+import afsp.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,12 +36,6 @@ public class AfspRequestParser {
         } catch (IOException e) {
             throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
-        try{
-            parseBody(reader, request);
-            LOGGER.info(" ** BODY Parsed ** ");
-        } catch (Exception e){
-            e.printStackTrace();
-        }
         return request;
     }
 
@@ -53,6 +50,7 @@ public class AfspRequestParser {
         while ((_byte = reader.read()) >= 0) {
             if (_byte == ByteCode.CR.code) {
                 if (!methodParsed || !targetParsed) {
+                    LOGGER.warn(" ** _CR_ BEFORE METHOD OR TARGET PARSED ** ");
                     throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
                 //check for lineFeed;
@@ -60,13 +58,15 @@ public class AfspRequestParser {
                 if (_byte == ByteCode.LF.code) {
                     //only support AFSP/1.0
                     if (!requestBuffer.toString().equals(AfspProtocolVersion.AFSP_1_0.toString())) {
-                        throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                        LOGGER.warn(" ** PROTOCOL_VERSION WRONG ** ");
+                        throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_505_PROTOCOL_NOT_SUPPORTED);
                     } else {
                         request.setProtocol(requestBuffer.toString());
                         requestBuffer.delete(0, requestBuffer.length());
                     }
                     return;
                 } else {
+                    LOGGER.warn(" ** NO _LF_ AFTER _CR_ ** ");
                     throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
             }
@@ -75,9 +75,12 @@ public class AfspRequestParser {
                     request.setMethod(requestBuffer.toString());
                     methodParsed = true;
                 } else if (!targetParsed) {
-                    request.setRequestTarget(requestBuffer.toString());
+                    String encodedTarget = requestBuffer.toString();
+                    String decodedTarget = Utils.decodeString(encodedTarget);
+                    request.setRequestTarget(decodedTarget);
                     targetParsed = true;
                 } else {
+                    LOGGER.warn(" ** _SP_ AFTER METHOD AND TARGET PARSED ** ");
                     throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
                 requestBuffer.delete(0, requestBuffer.length());
@@ -91,12 +94,6 @@ public class AfspRequestParser {
                 }
             }
         }
-
-    }
-
-    private void parseBody(InputStreamReader reader, AfspRequest request) {
-
-        //TODO or //REMOVE
 
     }
 }
