@@ -1,15 +1,22 @@
 .idea
+*.iml
 
 afspserver/build
 afspserver/target
+afspserver/*.iml
 
 afspclient/build
 afspclient/target
+afspclient/*.iml
 
 afsp/build
 afsp/target
+afsp/*.iml
 
 util/target
 util/build
+util/*.iml
+
+
 
 logs

@@ -1,13 +1,5 @@
 package config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import util.Json;
-
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class ConfigurationManager {
 
     /**
@@ -36,6 +28,7 @@ public class ConfigurationManager {
 
         int port = -1;
         String targetFolder = "";
+        boolean debug = false;
 
         for (String arg : args) {
             if (arg.startsWith("--port=")) {
@@ -50,6 +43,10 @@ public class ConfigurationManager {
             if (arg.startsWith("--folder=")) {
                 targetFolder = arg.substring(arg.lastIndexOf("=") + 1);
             }
+
+            if ("--debug=true".equals(arg)) {
+                debug = true;
+            }
         }
 
         if (targetFolder.isEmpty()) {
@@ -62,7 +59,13 @@ public class ConfigurationManager {
             System.exit(1);
         }
 
-        myCurrentConfiguration = new Configuration(port, targetFolder);
+        if (debug) {
+            System.setProperty("debug", "true");
+        } else {
+            System.setProperty("debug", "false");
+        }
+
+        myCurrentConfiguration = new Configuration(port, targetFolder, debug);
     }
 
     /**
