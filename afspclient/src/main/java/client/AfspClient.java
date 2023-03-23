@@ -16,22 +16,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import static util.LoggerConfiguration.reloadLogbackConfiguration;
+
 
 public class AfspClient {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AfspClient.class);
 
     public static void main(String[] args) {
-        LOGGER.info("Client Starting...");
-
-        var client = new AfspClient();
-
         ConfigurationManager.getInstance().initConfiguration(args);
         Configuration conf = ConfigurationManager.getInstance().getCurrentConfiguration();
+        reloadLogbackConfiguration(AfspClient.class.getClassLoader().getResourceAsStream("client-logback.xml"));
 
+        LOGGER.info("Client Starting...");
+        LOGGER.info("Using Mode: " + (conf.getDebug() ? "Debug" : "Production"));
         LOGGER.info("Using Port: " + conf.getPort());
+        LOGGER.info("Using Folder: " + conf.getFolder());
         LOGGER.info("Using Host: " + conf.getHost());
 
+        var client = new AfspClient();
 
         try {
             Socket socket = new Socket(conf.getHost(), conf.getPort());
