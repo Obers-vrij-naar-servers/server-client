@@ -4,13 +4,13 @@ import config.Configuration;
 
 import java.util.Scanner;
 
-public class ClientPrompt {
+public class Prompt {
 
     private MenuOption selectedMenuOption;
     private final RequestHandler requestHandler;
     private boolean firstPrompt = true;
 
-    public ClientPrompt(Configuration conf) {
+    public Prompt(Configuration conf) {
         this.requestHandler = new RequestHandler(conf);
     }
 
