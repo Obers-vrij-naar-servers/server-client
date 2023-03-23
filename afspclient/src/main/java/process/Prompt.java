@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class Prompt {
 
-    private MenuOption selectedMenuOption;
+    private method selectedMenuOption;
     private final RequestHandler requestHandler;
     private boolean firstPrompt = true;
 
@@ -19,16 +19,16 @@ public class Prompt {
             prompt();
 
             if(selectedMenuOption != null) {
-                requestHandler.handle();
+                requestHandler.handle(selectedMenuOption);
             }
 
             this.firstPrompt = false;
 
-        } while (selectedMenuOption != MenuOption.EXIT);
+        } while (selectedMenuOption != method.EXIT);
     }
 
     public void prompt() {
-        MenuOption[] options = MenuOption.values();
+        method[] options = method.values();
 
         if(this.firstPrompt) {
             System.out.println("Select an option:");

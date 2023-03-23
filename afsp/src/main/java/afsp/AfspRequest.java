@@ -12,7 +12,7 @@ public class AfspRequest extends AfspMessage {
 
     private List<AfspHeader> headerList;
 
-    AfspRequest(){
+    public AfspRequest(){
 
     };
 
@@ -35,7 +35,7 @@ public class AfspRequest extends AfspMessage {
         this.protocol = protocol;
     }
 
-    void setMethod(String  methodName) throws AfspParsingException {
+    public void setMethod(String methodName) throws AfspParsingException {
         for(AfspMethod _method: AfspMethod.values()){
             if (methodName.equals(_method.name())){
                 this.method = _method;
