@@ -21,6 +21,9 @@ public class AfspRequestParser {
         LOGGER.info("** Start Parsing Request **");
 
         InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+
+        // get request from input stream
+
         AfspRequest request = new AfspRequest();
 
         try {
@@ -36,6 +39,9 @@ public class AfspRequestParser {
         } catch (IOException e) {
             throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
+        // log request
+        LOGGER.info(" ** Request Parsed ** ");
+        LOGGER.info(" ** Request: {} {} {} ** ", request.getMethod(), request.getRequestTarget(), request.getProtocol());
         return request;
     }
 

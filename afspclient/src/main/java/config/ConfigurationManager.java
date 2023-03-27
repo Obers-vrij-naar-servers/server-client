@@ -28,6 +28,7 @@ public class ConfigurationManager {
 
         int port = -1;
         String host = "";
+        String folder = "";
         boolean debug = false;
 
         for (String arg : args) {
@@ -42,6 +43,10 @@ public class ConfigurationManager {
 
             if (arg.startsWith("--host=")) {
                 host = arg.substring(arg.lastIndexOf("=") + 1);
+            }
+
+            if (arg.startsWith("--folder=")) {
+                folder = arg.substring(arg.lastIndexOf("=") + 1);
             }
 
             if ("--debug=true".equals(arg)) {
@@ -59,13 +64,18 @@ public class ConfigurationManager {
             System.exit(1);
         }
 
+        if (folder.isEmpty()) {
+            System.out.println("Please provide a valid folder, hint don't forgot to use --folder=");
+            System.exit(1);
+        }
+
         if (debug) {
             System.setProperty("debug", "true");
         } else {
             System.setProperty("debug", "false");
         }
 
-        myCurrentConfiguration = new Configuration(port, host, debug);
+        myCurrentConfiguration = new Configuration(port, host, folder, debug);
     }
 
     /**

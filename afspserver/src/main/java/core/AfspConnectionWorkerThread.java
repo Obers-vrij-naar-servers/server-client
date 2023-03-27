@@ -30,7 +30,7 @@ public class AfspConnectionWorkerThread extends Thread {
     public void run() {
         InputStream inputStream = null;
         OutputStream outputStream = null;
-        AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().folder());
+        AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
         AfspRequestParser parser = new AfspRequestParser();
         AfspRequest request = null;
         AfspResponse response = null;

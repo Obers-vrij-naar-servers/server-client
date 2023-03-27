@@ -10,13 +10,10 @@ public class AfspRequest extends AfspMessage {
 
     private AfspMethod method;
     private String requestTarget;
+    private String requestLine;
     private String protocol = AfspProtocolVersion.AFSP_1_0.toString();
 
-    private List<AfspHeader> headerList;
-
-
     public AfspRequest(){
-
     };
 
     public AfspMethod getMethod() {
@@ -88,6 +85,7 @@ public class AfspRequest extends AfspMessage {
         return !conformationList.contains(false);
     }
 
+
     @Override
     public String toString() {
         String requestString;
@@ -98,5 +96,4 @@ public class AfspRequest extends AfspMessage {
 
         return requestString;
     }
-
 }

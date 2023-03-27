@@ -20,7 +20,7 @@ public class AfspHeader {
         this.headerType = headerType;
     }
 
-    AfspHeader(String headerName) throws AfspParsingException {
+    public AfspHeader(String headerName) throws AfspParsingException {
         for (HeaderType _headerType : HeaderType.values()) {
             if (headerName.equals(_headerType.toString())) {
                 this.headerType = _headerType;
@@ -84,16 +84,18 @@ public class AfspHeader {
             public String toString() {
                 return "Identifier";
             }
-        }
+        };
     }
 
     static List<AfspHeader> parseHeaders(InputStreamReader reader, AfspMessage message) throws IOException, AfspParsingException {
         LOGGER.debug(" ** PARSING HEADERS ** ");
+
         List<AfspHeader> headerList = new ArrayList<>();
         StringBuilder requestBuffer = new StringBuilder();
         int _byte;
         //Start reading the incoming stream
         while ((_byte = reader.read()) >= 0) {
+            // log byte and reader
             if (_byte == ByteCode.CR.code) {
                 //check for lineFeed;
                 _byte = reader.read();

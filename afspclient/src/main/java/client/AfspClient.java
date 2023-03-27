@@ -5,7 +5,7 @@ import config.ConfigurationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import process.Prompt;
+import core.Prompt;
 
 import static util.LoggerConfiguration.reloadLogbackConfiguration;
 
@@ -29,6 +29,6 @@ public class AfspClient {
 
         Prompt prompt = new Prompt(conf);
 
-        prompt.start();
+        prompt.start(conf.getFolder());
     }
 }

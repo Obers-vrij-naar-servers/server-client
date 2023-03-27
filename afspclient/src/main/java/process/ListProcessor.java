@@ -9,18 +9,17 @@ import util.AfspFileHandler;
 
 import java.util.List;
 
-public class ListProcessor extends RequestProcessor{
+public class ListProcessor extends BaseProcessor {
 
+    public ListProcessor(AfspRequest request, AfspResponse response) {
+        super(request, response);
+    }
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
-    public ListProcessor(AfspRequest request, AfspResponse response){
-        super(request,response);
-        LOGGER.info("** LIST_PROCESSOR STARTED **");
-
-    }
-
+    @Override
     public void process() throws AfspProcessingException {
         String target = request.getTarget();
+
         List<String> _list = null;
         if (target.equals("/") || target.equals("\"") || target.equals(".")) {
             _list = fileHandler.getFileList();

@@ -9,7 +9,7 @@ import java.util.List;
 public abstract class AfspMessage {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AfspResponse.class);
-    protected List<AfspHeader> headerList;
+    protected List<AfspHeader> headerList = new ArrayList<>();
     public void addHeader(AfspHeader header){
         if(this.headerList == null){
             this.headerList = new ArrayList<>();
@@ -37,4 +37,5 @@ public abstract class AfspMessage {
 
         return headerString+"\r\n";
     }
+
 }

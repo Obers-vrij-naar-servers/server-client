@@ -11,10 +11,9 @@ import util.AfspFileHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.channels.SocketChannel;
 import java.util.List;
 
-public class GetProcessor extends RequestProcessor {
+public class GetProcessor extends BaseProcessor {
 
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
     private final Socket socket;
@@ -23,7 +22,7 @@ public class GetProcessor extends RequestProcessor {
         super(request, response);
         this.socket = socket;
     }
-    public void process() throws AfspProcessingException{
+    public void process() throws AfspProcessingException {
 
         //validate headers
         if (!request.containsHeaders(AfspHeader.HeaderType.BUFFER_SIZE,AfspHeader.HeaderType.CHARSET,AfspHeader.HeaderType.TIME_OUT)){
