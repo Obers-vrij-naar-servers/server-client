@@ -65,8 +65,7 @@ public class ConfigurationManager {
         }
 
         if (folder.isEmpty()) {
-            System.out.println("Please provide a valid folder, hint don't forgot to use --folder=");
-            System.exit(1);
+            folder = "";
         }
 
         if (debug) {

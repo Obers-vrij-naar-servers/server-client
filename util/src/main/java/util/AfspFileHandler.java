@@ -6,6 +6,8 @@ import afsp.AfspStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -24,7 +26,7 @@ public class AfspFileHandler {
 
 
     public AfspFileHandler(String folder) {
-        localFileDir = folder;
+        localFileDir = "C:\\Users\\tramp\\OneDrive\\Bureaublad";
         System.out.println("File handler created");
         updateFileList();
     }
@@ -50,6 +52,7 @@ public class AfspFileHandler {
         updateFileList();
         boolean fileExists = false;
 
+        LOGGER.info("** FILE-LIST: "+fileName+" **");
         for(String _fName : fileList){
             if( _fName.equals(fileName)){
                 fileExists = true;
@@ -91,17 +94,31 @@ public class AfspFileHandler {
         fileChannel.close();
     }
 
-    public void receiveFile(SocketChannel channel, long fileSize,int bufferSize,String fileName) throws IOException {
-
+    public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName) throws IOException {
         Path path = Path.of(getFullPath(fileName));
-        FileChannel fileChannel = FileChannel.open(path.toAbsolutePath(),StandardOpenOption.CREATE,StandardOpenOption.WRITE);
+        FileChannel fileChannel = FileChannel.open(path.toAbsolutePath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
-        while ( channel.read(buffer)>0){
+        while (fileSize > 0) {
+            int bytesRead = channel.read(buffer);
+            if (bytesRead == -1) {
+                break;
+            }
+            fileSize -= bytesRead;
+            buffer.flip();
             fileChannel.write(buffer);
             buffer.clear();
         }
+
+        // close the file channel
+        fileChannel.close();
+
+        // convert the saved file to JPEG format
+        BufferedImage image = ImageIO.read(new File(path.toString()));
+        File output = new File(getFullPath(fileName + ".jpg"));
+        ImageIO.write(image, "JPEG", output);
     }
+
 
 
     private String getFullPath(String fileName){

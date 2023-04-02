@@ -2,6 +2,12 @@ package util;
 
 public class PathHelper {
     public static boolean isFile(String path) {
+
+        // if path is / then return false
+        if (path.equals("/")) {
+            return false;
+        }
+
         String[] pathParts = path.split("/");
 
         if (pathParts.length == 0) {

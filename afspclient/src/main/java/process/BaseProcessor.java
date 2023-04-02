@@ -17,5 +17,5 @@ public abstract class BaseProcessor {
         this.request = request;
         this.response = response;
     }
-    public abstract void process() throws AfspProcessingException;
+    public abstract void process() throws Exception;
 }

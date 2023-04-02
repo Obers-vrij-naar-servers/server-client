@@ -9,10 +9,13 @@ import config.Configuration;
 import factory.RequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import process.GetProcessor;
 import util.Helper;
 
 import java.io.*;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 public class PromptHandler {
 
@@ -26,26 +29,34 @@ public class PromptHandler {
     }
 
     public void handle(PromptResponse promptResponse) {
-        try {
-            Socket socket = new Socket(conf.getHost(), conf.getPort());
-            OutputStream out = socket.getOutputStream();
-            InputStream in = socket.getInputStream();
+        try (SocketChannel socketChannel = SocketChannel.open()) {
+            InetSocketAddress address = new InetSocketAddress(conf.getHost(), conf.getPort());
+            socketChannel.connect(address);
+
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
             AfspResponseParser parser = new AfspResponseParser();
             AfspRequest request = requestFactory.createRequest(promptResponse);
             LOGGER.info("Request: " + request.toString());
-            out.write(request.toString().getBytes());
+            buffer.put(request.toString().getBytes());
+            buffer.flip();
+            socketChannel.write(buffer);
+            buffer.clear();
 
+            AfspResponse response = parser.parseResponse(socketChannel);
 
-            try{
-                AfspResponse response = parser.parseResponse(in);
+            GetProcessor processor = new GetProcessor(socketChannel.socket(), request, response);
+
+            try {
+                processor.process();
                 System.out.println("response " + response.toString());
-                return;
-            } catch (AfspParsingException | AfspResponseException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                Helper.closeChanelConnections(socketChannel);
             }
-            Helper.closeConnections(in,out,socket);
-
-        } catch (IOException | AfspParsingException e) {
+        } catch (IOException | AfspParsingException | AfspResponseException e) {
             throw new RuntimeException(e);
         }
     }

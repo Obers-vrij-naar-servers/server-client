@@ -16,6 +16,7 @@ public class ListProcessor extends RequestProcessor{
     public ListProcessor(AfspRequest request, AfspResponse response){
         super(request,response);
         LOGGER.info("** LIST_PROCESSOR STARTED **");
+        LOGGER.info(request.toString());
 
     }
 
