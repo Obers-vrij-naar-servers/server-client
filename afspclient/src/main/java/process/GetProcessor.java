@@ -10,6 +10,7 @@ import util.AfspFileHandler;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 
 public class GetProcessor extends BaseProcessor {
@@ -41,12 +42,9 @@ public class GetProcessor extends BaseProcessor {
                 if (header.getHeaderType() == AfspHeader.HeaderType.CONTENT_LENGTH) {
                     contentLength = Long.parseLong(header.getHeaderContent());
                 }
-                if (header.getHeaderType() == AfspHeader.HeaderType.BUFFER_SIZE) {
-                    bufferSize = Integer.parseInt(header.getHeaderContent());
-                }
             }
 
-            fileHandler.receiveFile(socketChannel, contentLength, bufferSize, request.getTarget());
+            fileHandler.receiveFile(socketChannel, contentLength, 8192, request.getTarget());
 
 //                // read the image using javax.imageio
 //                ByteArrayInputStream bais = new ByteArrayInputStream(fileBytes);
