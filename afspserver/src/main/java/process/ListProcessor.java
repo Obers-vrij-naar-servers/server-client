@@ -17,7 +17,6 @@ public class ListProcessor extends RequestProcessor{
         super(request,response);
         LOGGER.info("** LIST_PROCESSOR STARTED **");
         LOGGER.info(request.toString());
-
     }
 
     public void process() throws AfspProcessingException {

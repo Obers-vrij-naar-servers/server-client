@@ -21,14 +21,15 @@ public class AfspResponseParser {
         LOGGER.info("** Start Parsing Response **");
         InputStreamReader reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
         AfspResponse response = new AfspResponse();
-        try {
-            parseStatusLine(reader,response);
-            AfspHeader.parseHeaders(reader,response);
-            parseBody(reader,response);
-        } catch (IOException | RuntimeException e){
-            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
-        }
-        return response;
+            try {
+                parseStatusLine(reader,response);
+                AfspHeader.parseHeaders(reader,response);
+                parseBody(reader,response);
+            } catch (IOException e) {
+                throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+            }
+            return response;
+
     }
 
 
@@ -95,13 +96,18 @@ public class AfspResponseParser {
 
         }
     }
-
     private void parseBody(InputStreamReader reader, AfspResponse response) throws IOException {
         LOGGER.info(" ** PARSING BODY **");
         StringBuilder bodyBuffer = new StringBuilder();
-        int _byte;
-        while ((_byte = reader.read()) >= 0){
-            bodyBuffer.append((char)_byte);
+        while (true) {
+            if (!reader.ready()) {
+                break;
+            }
+            int _byte = reader.read();
+            if (_byte < 0) {
+                break;
+            }
+            bodyBuffer.append((char) _byte);
         }
         String body = bodyBuffer.toString();
         response.setBody(body);
