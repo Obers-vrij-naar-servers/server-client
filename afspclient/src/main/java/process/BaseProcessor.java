@@ -16,5 +16,5 @@ public abstract class BaseProcessor {
         this.request = request;
         this.response = response;
     }
-    public abstract ProcessResult process() throws Exception;
+    public abstract void process() throws Exception;
 }

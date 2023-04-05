@@ -3,17 +3,22 @@ package process;
 import java.util.List;
 
 public class ProcessResult {
-    List<String> target;
+    private static List<String> files;
+    private static int fileChoice;
 
-    public ProcessResult(List<String> target) {
-        this.target = target;
+    public static int getFileChoice() {
+        return fileChoice;
     }
 
-    public List<String> getTarget() {
-        return target;
+    public static void setFileChoice(int fileChoice) {
+        ProcessResult.fileChoice = fileChoice;
     }
 
-    public void setTarget(List<String> target) {
-        this.target = target;
+    public static List<String> getFiles() {
+        return files;
+    }
+
+    public static void setFiles(List<String> files) {
+        ProcessResult.files = files;
     }
 }

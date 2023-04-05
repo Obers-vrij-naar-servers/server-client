@@ -1,11 +1,8 @@
 package process;
 
-import afsp.AfspHeader;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
 import afsp.exception.AfspProcessingException;
-import config.ConfigurationManager;
-import util.AfspFileHandler;
 
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
@@ -21,7 +18,7 @@ public class ListProcessor extends BaseProcessor {
     }
 
     @Override
-    public ProcessResult process() throws AfspProcessingException {
+    public void process() throws AfspProcessingException {
 
         try {
             String responseContent = response.getBody();
@@ -42,9 +39,7 @@ public class ListProcessor extends BaseProcessor {
                 System.out.println("- " + file);
             }
 
-            System.out.println();
-
-            return new ProcessResult(files);
+            ProcessResult.setFiles(files);
 
         } catch (Exception e) {
             throw new AfspProcessingException(SERVER_ERROR_500_INTERNAL_SERVER_ERROR);

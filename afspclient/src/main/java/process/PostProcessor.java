@@ -16,7 +16,6 @@ public class PostProcessor extends BaseProcessor {
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     @Override
-    public ProcessResult process() throws AfspProcessingException {
-        return new ProcessResult(null);
+    public void process() throws AfspProcessingException {
     }
 }

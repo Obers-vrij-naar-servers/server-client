@@ -29,7 +29,6 @@ public class PromptHandler {
     private final RequestFactory requestFactory = new RequestFactory();
     private BaseProcessor processor;
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-    private ProcessResult result;
 
     public PromptHandler(Configuration conf) {
         this.conf = conf;
@@ -45,17 +44,6 @@ public class PromptHandler {
             AfspRequest request = requestFactory.createRequest(promptResponse);
             LOGGER.info("Request: " + request.toString());
 
-            // TODO make this a loop
-            if (request.getMethod() == AfspMethod.GET) {
-                if (result != null && result.getTarget() != null) {
-                    List<String> targets = result.getTarget();
-                    request.setRequestTarget(targets.get(0));
-                } else {
-                    System.out.println("Please first retrieve a list of files");
-                    return;
-                }
-            }
-
             buffer.put(request.toString().getBytes());
             buffer.flip();
             socketChannel.write(buffer);
@@ -65,58 +53,28 @@ public class PromptHandler {
 
             if (request.getMethod() == AfspMethod.LIST) {
                 processor = new ListProcessor(socketChannel, request, response);
-
-                try {
-                    result = processor.process();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    Helper.closeChanelConnections(socketChannel);
-                }
             }
 
             if (request.getMethod() == AfspMethod.GET) {
                 processor = new GetProcessor(socketChannel, request, response);
-
-                try {
-                    processor.process();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    Helper.closeChanelConnections(socketChannel);
-                }
             }
 
             if (request.getMethod() == AfspMethod.POST) {
                 processor = new PostProcessor(socketChannel, request, response);
-
-                try {
-                    processor.process();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    Helper.closeChanelConnections(socketChannel);
-                }
             }
 
             if (request.getMethod() == AfspMethod.DELETE) {
                 new DeleteProcessor(socketChannel.socket(), request, response);
+            }
 
-                try {
-                    result = processor.process();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    Helper.closeChanelConnections(socketChannel);
-                }
+            try {
+                processor.process();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                Helper.closeChanelConnections(socketChannel);
             }
 
         } catch (IOException e) {

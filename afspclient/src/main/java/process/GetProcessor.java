@@ -20,7 +20,7 @@ public class GetProcessor extends BaseProcessor {
         this.socketChannel = socket;
     }
 
-    public ProcessResult process() throws Exception {
+    public void process() throws Exception {
 
         if (socketChannel == null) {
             throw new Exception("Socket channel is null");
@@ -44,8 +44,6 @@ public class GetProcessor extends BaseProcessor {
 
         fileHandler.receiveFile(socketChannel, fileSize, 8192, request.getTarget());
 
-
-        return new ProcessResult(null);
 
     }
 
