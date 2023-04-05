@@ -74,7 +74,7 @@ public class Prompt {
     }
 
     private void followUpQuestions(Scanner scanner, Action selectedAction) {
-        if (selectedAction == Action.SHOW_ALL_FILES) {
+        if (selectedAction == Action.SYNC_FILES_TO_LOCAL_FOLDER) {
 
         }
     }

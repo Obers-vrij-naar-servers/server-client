@@ -24,7 +24,16 @@ public class AfspFileHandler {
 
     private String localFileDir;
     private List<String> fileList = new ArrayList<>();
+    private List<String> targetFiles = new ArrayList<>();
 
+
+    public List<String> getTargetFiles() {
+        return targetFiles;
+    }
+
+    public void setTargetFiles(List<String> targetFiles) {
+        this.targetFiles = targetFiles;
+    }
 
     public AfspFileHandler(String folder) {
         localFileDir = folder;

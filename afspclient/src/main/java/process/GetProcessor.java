@@ -21,25 +21,28 @@ public class GetProcessor extends BaseProcessor {
     }
 
     public ProcessResult process() throws Exception {
-        // get the file content as bytes
-        byte[] fileBytes = response.getBody().getBytes(StandardCharsets.UTF_8);
-
-        SocketChannel channel = socketChannel;
 
         if (socketChannel == null) {
             throw new Exception("Socket channel is null");
         }
 
-        Long contentLength = 0L;
-        int bufferSize = 0;
+        Long fileSize = 0L;
 
         for (AfspHeader header : response.getheaderList()) {
-            if (header.getHeaderType() == AfspHeader.HeaderType.CONTENT_LENGTH) {
-                contentLength = Long.parseLong(header.getHeaderContent());
+            if (header.getHeaderType() == AfspHeader.HeaderType.FILE_SIZE) {
+                try {
+                    fileSize = Long.parseLong(header.getHeaderContent());
+                } catch (NumberFormatException e) {
+                    throw new Exception("Content length is not a valid number: " + header.getHeaderContent());
+                }
             }
         }
 
-        fileHandler.receiveFile(socketChannel, contentLength, 8192, request.getTarget());
+        if (fileSize == 0L) {
+            throw new Exception("Content length header is missing or has a value of 0");
+        }
+
+        fileHandler.receiveFile(socketChannel, fileSize, 8192, request.getTarget());
 
 
         return new ProcessResult(null);

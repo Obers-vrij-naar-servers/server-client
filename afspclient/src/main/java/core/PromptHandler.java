@@ -54,7 +54,6 @@ public class PromptHandler {
                     System.out.println("Please first retrieve a list of files");
                     return;
                 }
-
             }
 
             buffer.put(request.toString().getBytes());
@@ -66,28 +65,58 @@ public class PromptHandler {
 
             if (request.getMethod() == AfspMethod.LIST) {
                 processor = new ListProcessor(socketChannel, request, response);
+
+                try {
+                    result = processor.process();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    Helper.closeChanelConnections(socketChannel);
+                }
             }
 
             if (request.getMethod() == AfspMethod.GET) {
                 processor = new GetProcessor(socketChannel, request, response);
+
+                try {
+                    processor.process();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    Helper.closeChanelConnections(socketChannel);
+                }
             }
 
             if (request.getMethod() == AfspMethod.POST) {
                 processor = new PostProcessor(socketChannel, request, response);
+
+                try {
+                    processor.process();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    Helper.closeChanelConnections(socketChannel);
+                }
             }
 
             if (request.getMethod() == AfspMethod.DELETE) {
-                processor = new DeleteProcessor(socketChannel.socket(), request, response);
-            }
+                new DeleteProcessor(socketChannel.socket(), request, response);
 
-            try {
-                result = processor.process();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                Helper.closeChanelConnections(socketChannel);
+                try {
+                    result = processor.process();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    Helper.closeChanelConnections(socketChannel);
+                }
             }
 
         } catch (IOException e) {
