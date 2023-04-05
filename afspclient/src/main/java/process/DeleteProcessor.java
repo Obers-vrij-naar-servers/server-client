@@ -7,15 +7,17 @@ import config.ConfigurationManager;
 import util.AfspFileHandler;
 
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 public class DeleteProcessor extends BaseProcessor {
 
-    public DeleteProcessor(Socket socket, AfspRequest request, AfspResponse response) {
+    public DeleteProcessor(SocketChannel socketChannel, AfspRequest request, AfspResponse response) {
         super(request, response);
     }
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     @Override
     public void process() throws AfspProcessingException {
+
     }
 }

@@ -3,6 +3,7 @@ package core;
 import config.Configuration;
 import process.ProcessResult;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Prompt {
@@ -20,7 +21,7 @@ public class Prompt {
         do {
             prompt(folder);
 
-            if(ready) {
+            if (ready) {
                 promptHandler.handle(promptResponse);
                 firstPrompt = false;
             }
@@ -30,53 +31,81 @@ public class Prompt {
 
     public void prompt(String folder) {
         Action[] actions = Action.values();
+        Scanner scannerInput = new Scanner(System.in);
+        int selectedAction = 0;
 
         if (firstPrompt) {
-            System.out.println("Select an option:");
+            System.out.println("\u001B[36m" + "Gets the list of files on the server first:" + "\u001B[0m");
+
         } else {
-            System.out.println("Press enter to continue...");
+            System.out.println();
+            System.out.println("\u001B[33m" + "Press enter to continue... " + "\u001B[0m");
             Scanner scanner = new Scanner(System.in);
             scanner.nextLine();
-            System.out.println("Select another option:");
-        }
+            System.out.println("\u001B[36m" + "Select another option: " + "\u001B[0m");
 
-        for (int i = 0; i < actions.length; i++) {
-            System.out.println((i + 1) + ". " + actions[i].getLabel());
-        }
+            for (int i = 0; i < actions.length; i++) {
+                System.out.println((i + 1) + ". " + actions[i].getLabel());
+            }
 
-        int selectedAction = 0;
-        boolean validOption = false;
-        Scanner scanner = new Scanner(System.in); // create a new instance of the Scanner class
-        while (!validOption) {
-            System.out.print("Enter option number: ");
+            boolean validOption = false;
+            while (!validOption) {
+                System.out.println("\u001B[34m" + "Enter option by number: " + "\u001B[0m");
+                System.out.println();
 
-            if (scanner.hasNextInt()) {
-                selectedAction = scanner.nextInt();
-                if (selectedAction >= 1 && selectedAction <= actions.length) {
-                    validOption = true;
+                if (scannerInput.hasNextInt()) {
+                    selectedAction = scannerInput.nextInt();
+                    if (selectedAction >= 1 && selectedAction <= actions.length) {
+                        validOption = true;
+                    } else {
+                        System.out.println("\\u001B[31m\" +Invalid option. Please enter a number between 1 and " + actions.length + "\u001B[0m");
+                    }
                 } else {
-                    System.out.println("Invalid option. Please enter a number between 1 and " + actions.length);
+                    System.out.println("\\u001B[31m\"Invalid input. Please enter a number." + "\u001B[0m");
+                    scannerInput.next();
                 }
-            } else {
-                System.out.println("Invalid input. Please enter a number.");
-                scanner.next();
             }
+            promptResponse.setAction(actions[selectedAction - 1]);
         }
 
-        promptResponse.setAction(actions[selectedAction - 1]);
+        promptResponse.setAction(actions[0]);
 
-        System.out.println("You selected: " + promptResponse.getAction().getLabel());
+        if (promptResponse.getAction() == Action.Download_FILE) {
+            downloadFollowUp(scannerInput);
+        }
 
-        if(promptResponse.getAction() == Action.SYNC_FILES_TO_LOCAL_FOLDER) {
-            System.out.println("Which files do you want to?");
-            scanner.nextLine();
-
-            if(scanner.hasNextInt()) {
-                ProcessResult.setFileChoice(scanner.nextInt() - 1);
-            }
+        if (promptResponse.getAction() == Action.DELETE_FILE_FROM_SERVER) {
+            deleteFollowUp(scannerInput);
         }
 
         ready = true;
+    }
+
+    private void deleteFollowUp(Scanner scanner) {
+        System.out.println("\u001B[34m" + "Select a file to delete by number: " + "\u001B[0m");
+        System.out.println();
+        for (int i = 0; i < ProcessResult.getFiles().size(); i++) {
+            System.out.println((i + 1) + ". " + ProcessResult.getFiles().get(i));
+        }
+        scanner.nextLine();
+
+        if (scanner.hasNextInt()) {
+            ProcessResult.setFileChoice(scanner.nextInt() - 1);
+        }
+    }
+
+
+    private void downloadFollowUp(Scanner scanner) {
+        System.out.println("\u001B[34m" + "Select a file to download by number: " + "\u001B[0m");
+        System.out.println();
+        for (int i = 0; i < ProcessResult.getFiles().size(); i++) {
+            System.out.println((i + 1) + ". " + ProcessResult.getFiles().get(i));
+        }
+        scanner.nextLine();
+
+        if (scanner.hasNextInt()) {
+            ProcessResult.setFileChoice(scanner.nextInt() - 1);
+        }
     }
 
 

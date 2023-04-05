@@ -32,12 +32,14 @@ public class ListProcessor extends BaseProcessor {
             files = Arrays.asList(fileNames);
 
             System.out.println();
-            System.out.println("Files on the server:");
+            System.out.println("\u001B[36m" + "Files on the server:" + "\u001B[0m");
             System.out.println();
 
-            for (String file : files) {
-                System.out.println("- " + file);
+            // with index
+            for (int i = 0; i < files.size(); i++) {
+                System.out.println("\u001B[32m" + (i + 1) + ". " + files.get(i)  + "\u001B[0m");
             }
+
 
             ProcessResult.setFiles(files);
 

@@ -26,7 +26,7 @@ public class RequestFactory {
                 setMethod(request, "LIST");
 
             }
-            case SYNC_FILES_TO_LOCAL_FOLDER  -> {
+            case Download_FILE -> {
                 setMethod(request, "GET");
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.CHARSET)).setHeaderContent("UTF-8"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.BUFFER_SIZE)).setHeaderContent("8192"));
@@ -35,7 +35,7 @@ public class RequestFactory {
                 if (ProcessResult.getFiles() != null && ProcessResult.getFiles().size() > 0) {
                     List<String> targets = ProcessResult.getFiles();
                     request.setRequestTarget(targets.get(ProcessResult.getFileChoice()));
-                    System.out.println("Downloading file: " + targets.get(ProcessResult.getFileChoice()));
+                    System.out.println("\u001B[36m" + "Downloading file: " + targets.get(ProcessResult.getFileChoice()) + "...." + "\u001B[0m");
                 } else {
                     throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
@@ -50,7 +50,6 @@ public class RequestFactory {
             }
             case DELETE_FILE_FROM_SERVER -> {
                 setMethod(request, "DELETE");
-                headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
             }
 
             case EXIT -> {

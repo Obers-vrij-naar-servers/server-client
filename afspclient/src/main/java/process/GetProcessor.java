@@ -27,6 +27,7 @@ public class GetProcessor extends BaseProcessor {
         }
 
         Long fileSize = 0L;
+        response.getheaderList();
 
         for (AfspHeader header : response.getheaderList()) {
             if (header.getHeaderType() == AfspHeader.HeaderType.FILE_SIZE) {
