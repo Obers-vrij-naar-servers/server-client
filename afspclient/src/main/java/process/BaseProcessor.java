@@ -2,7 +2,6 @@ package process;
 
 import afsp.AfspRequest;
 import afsp.AfspResponse;
-import afsp.exception.AfspProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,5 +16,5 @@ public abstract class BaseProcessor {
         this.request = request;
         this.response = response;
     }
-    public abstract void process() throws Exception;
+    public abstract ProcessResult process() throws Exception;
 }

@@ -3,7 +3,9 @@ package factory;
 import afsp.AfspHeader;
 import afsp.AfspRequest;
 import afsp.exception.AfspParsingException;
+import afsp.exception.AfspProcessingException;
 import core.PromptResponse;
+
 import java.util.List;
 
 
@@ -12,10 +14,10 @@ public class RequestFactory {
     public RequestFactory() {
     }
 
-    public AfspRequest createRequest(PromptResponse promptResponse) throws IllegalArgumentException, AfspParsingException {
+    public AfspRequest createRequest(PromptResponse promptResponse) throws IllegalArgumentException, AfspParsingException, AfspProcessingException {
         AfspRequest request = new AfspRequest();
         List<AfspHeader> headerList = request.getHeaderList();
-        request.setRequestTarget(promptResponse.getRequestPath());
+        request.setRequestTarget("/");
 
 
         switch (promptResponse.getAction()) {

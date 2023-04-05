@@ -2,7 +2,6 @@ package core;
 
 import config.Configuration;
 import java.util.Scanner;
-import static util.PathHelper.isFile;
 
 public class Prompt {
 
@@ -70,19 +69,6 @@ public class Prompt {
 
         promptResponse.setAction(actions[selectedAction - 1]);
 
-        try {
-            if(isFile(folder)) {
-                promptResponse.setRequestPath(folder);
-                promptResponse.setIsFile(true);
-            } else {
-                promptResponse.setRequestPath(folder);
-                promptResponse.setIsFile(false);
-            };
-
-        } catch (Exception e) {
-            System.out.println("No such file or directory");
-        }
-
         System.out.println("You selected: " + promptResponse.getAction().getLabel());
         ready = true;
     }
@@ -92,7 +78,4 @@ public class Prompt {
 
         }
     }
-
-
-
 }

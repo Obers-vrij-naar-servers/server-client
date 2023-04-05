@@ -7,38 +7,48 @@ import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
 
+import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.List;
 
-public class ListProcessor extends BaseProcessor {
+import static afsp.AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR;
 
-    public ListProcessor(AfspRequest request, AfspResponse response) {
+public class ListProcessor extends BaseProcessor {
+    List<String> files;
+
+    public ListProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
         super(request, response);
     }
-    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     @Override
-    public void process() throws AfspProcessingException {
-        String target = request.getTarget();
+    public ProcessResult process() throws AfspProcessingException {
 
-        List<String> _list = null;
-        if (target.equals("/") || target.equals("\"") || target.equals(".")) {
-            _list = fileHandler.getFileList();
+        try {
+            String responseContent = response.getBody();
+            // Strip \n from response
+            responseContent = responseContent.substring(0, responseContent.length() - 1);
 
-            if (_list == null) {
-                LOGGER.info(" ** LIST IS EMPTY ** ");
-                return;
+            // Split response into separate file names
+            String[] fileNames = responseContent.split("\\n");
+
+            // Convert array to list
+            files = Arrays.asList(fileNames);
+
+            System.out.println();
+            System.out.println("Files on the server:");
+            System.out.println();
+
+            for (String file : files) {
+                System.out.println("- " + file);
             }
-            String bodyString = "";
-            for (String fileName : _list) {
-                bodyString += fileName + "\n";
-            }
-            AfspHeader contentLengthHeader = new AfspHeader(AfspHeader.HeaderType.CONTENT_LENGTH);
-            contentLengthHeader.setHeaderContent(String.valueOf(bodyString.getBytes().length));
-            response.addHeader(contentLengthHeader);
-            response.setBody(bodyString);
-        } else {
-            var fileListHeaders = fileHandler.getFileInfo(request.getTarget());
-            response.setHeaderList(fileListHeaders);
+
+            System.out.println();
+
+            return new ProcessResult(files);
+
+        } catch (Exception e) {
+            throw new AfspProcessingException(SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
+
     }
 }
