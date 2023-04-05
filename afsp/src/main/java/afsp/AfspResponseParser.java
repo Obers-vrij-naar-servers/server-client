@@ -29,7 +29,18 @@ public class AfspResponseParser {
                 throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
             }
             return response;
-
+    }
+    public AfspResponse parseResponseToGet(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException {
+        LOGGER.info("** Start Parsing Response **");
+        InputStreamReader reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
+        AfspResponse response = new AfspResponse();
+        try {
+            parseStatusLine(reader,response);
+            AfspHeader.parseHeaders(reader,response);
+        } catch (IOException e) {
+            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+        }
+        return response;
     }
 
 
@@ -109,7 +120,10 @@ public class AfspResponseParser {
             }
             bodyBuffer.append((char) _byte);
         }
+        LOGGER.info(" ** PARSING BODY DONE **");
+
         String body = bodyBuffer.toString();
         response.setBody(body);
+        LOGGER.info(response.toString());
     }
 }

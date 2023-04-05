@@ -41,5 +41,6 @@ public class ListProcessor extends RequestProcessor{
             var fileListHeaders = fileHandler.getFileInfo(request.getTarget());
             response.setHeaderList(fileListHeaders);
         }
+        LOGGER.debug("SENDING RESPONSE: \n" + response);
     }
 }

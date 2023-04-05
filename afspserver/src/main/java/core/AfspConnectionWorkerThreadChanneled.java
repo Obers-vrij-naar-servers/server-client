@@ -10,9 +10,7 @@ import process.ListProcessor;
 import process.RequestProcessor;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
 
@@ -20,25 +18,17 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AfspConnectionWorkerThreadChanneled.class);
 
-    private SocketChannel channel;
+    private final SocketChannel channel;
     public AfspConnectionWorkerThreadChanneled(SocketChannel channel) throws IOException {
         this.channel = channel;
         LOGGER.debug("CREATED");
-
-//        ByteBuffer buffer = ByteBuffer.allocate(1024);
-//        channel.read(buffer);
-//
-//        LOGGER.debug(new String(buffer.array()));
-//        buffer.flip();
-//        channel.write(buffer);
-//        channel.close();
     }
     @Override
     public void run(){
 
         AfspRequestParser parser = new AfspRequestParser();
-        AfspRequest request = null;
-        AfspResponse response = null;
+        AfspRequest request;
+        AfspResponse response;
         RequestProcessor processor = null;
         try {
             request = parser.parseAfspRequest(channel);
@@ -51,6 +41,9 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
             if (request.getMethod() == AfspMethod.GET) {
                 LOGGER.info(" ** PROCESSING GET **");
                 processor = new GetProcessor(request, response, channel);
+            }
+            if (processor == null){
+                throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
             }
             processor.process();
             OutputStream out = Channels.newOutputStream(channel);
