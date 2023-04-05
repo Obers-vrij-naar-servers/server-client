@@ -1,0 +1,8 @@
+2023-03-21 16:40:58,139 INFO [main] s.AfspServer [AfspServer.java:28] Server Starting...
+2023-03-21 16:40:58,141 INFO [main] s.AfspServer [AfspServer.java:29] Using Mode: Production
+2023-03-21 16:40:58,144 INFO [main] s.AfspServer [AfspServer.java:30] Using Port: 8080
+2023-03-21 16:40:58,144 INFO [main] s.AfspServer [AfspServer.java:31] Using Folder: C:\Users\tramp\OneDrive\Bureaublad\server
+2023-03-21 16:42:06,360 INFO [main] s.AfspServer [AfspServer.java:28] Server Starting...
+2023-03-21 16:42:06,363 INFO [main] s.AfspServer [AfspServer.java:29] Using Mode: Production
+2023-03-21 16:42:06,366 INFO [main] s.AfspServer [AfspServer.java:30] Using Port: 8080
+2023-03-21 16:42:06,366 INFO [main] s.AfspServer [AfspServer.java:31] Using Folder: C:\Users\tramp\OneDrive\Bureaublad\server

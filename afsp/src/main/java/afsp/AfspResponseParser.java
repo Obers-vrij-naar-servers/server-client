@@ -2,43 +2,47 @@ package afsp;
 
 import afsp.exception.AfspParsingException;
 import afsp.exception.AfspResponseException;
+import afsp.util.ByteCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.channels.Channels;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 
 public class AfspResponseParser {
     private final Logger LOGGER = LoggerFactory.getLogger(AfspResponseParser.class);
 
 
-    public AfspResponse parseResponse(InputStream inputStream) throws AfspParsingException, AfspResponseException {
+    public AfspResponse parseResponse(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException {
         LOGGER.info("** Start Parsing Response **");
-        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        InputStreamReader reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
+        AfspResponse response = new AfspResponse();
+            try {
+                parseStatusLine(reader,response);
+                AfspHeader.parseHeaders(reader,response);
+                parseBody(reader,response);
+            } catch (IOException e) {
+                throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+            }
+            return response;
+    }
+    public AfspResponse parseResponseToGet(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException {
+        LOGGER.info("** Start Parsing Response **");
+        InputStreamReader reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
         AfspResponse response = new AfspResponse();
         try {
             parseStatusLine(reader,response);
             AfspHeader.parseHeaders(reader,response);
-            parseBody(reader,response);
-        } catch (IOException | RuntimeException e){
+        } catch (IOException e) {
             throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
-//        try{
-//            AfspHeader.parseHeaders(reader,response);
-//        } catch (IOException e){
-//            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
-//        }
-//        try {
-//            parseBody(reader,response);
-//        } catch (IOException e){
-//            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
-//        }
-
-
         return response;
     }
+
 
     private void parseStatusLine(InputStreamReader reader, AfspResponse response) throws AfspResponseException, IOException {
         boolean protocolParsed = false;
@@ -103,15 +107,23 @@ public class AfspResponseParser {
 
         }
     }
-
     private void parseBody(InputStreamReader reader, AfspResponse response) throws IOException {
         LOGGER.info(" ** PARSING BODY **");
         StringBuilder bodyBuffer = new StringBuilder();
-        int _byte;
-        while ((_byte = reader.read()) >= 0){
-            bodyBuffer.append((char)_byte);
+        while (true) {
+            if (!reader.ready()) {
+                break;
+            }
+            int _byte = reader.read();
+            if (_byte < 0) {
+                break;
+            }
+            bodyBuffer.append((char) _byte);
         }
+        LOGGER.info(" ** PARSING BODY DONE **");
+
         String body = bodyBuffer.toString();
         response.setBody(body);
+        LOGGER.info(response.toString());
     }
 }
