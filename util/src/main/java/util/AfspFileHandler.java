@@ -10,6 +10,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.channels.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -22,7 +25,6 @@ public class AfspFileHandler {
 
     private String localFileDir;
     private List<String> fileList = new ArrayList<>();
-
 
     public AfspFileHandler(String folder) {
         localFileDir = folder;
@@ -117,8 +119,28 @@ public class AfspFileHandler {
         LOGGER.debug("EXITING LOOP");
         // close the file channel
 
-        fileChannel.close();
+        try {
+            // read the file content from the channel into a ByteBuffer
+            ByteBuffer fileContent = ByteBuffer.allocate((int) Files.size(path));
+            fileChannel = FileChannel.open(path.toAbsolutePath(), StandardOpenOption.READ);
+            fileChannel.read(fileContent);
+            fileContent.flip();
+
+            // convert the ByteBuffer into a string using the appropriate character set
+            String content = StandardCharsets.UTF_8.decode(fileContent).toString();
+
+            // write the string to a file using a FileWriter, and flush the content to make sure it is written to the file
+            File output = new File(getFullPath(fileName + ".txt"));
+            FileWriter fileWriter = new FileWriter(output);
+            fileWriter.write(content);
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
+
 
 
 

@@ -1,13 +1,11 @@
 package process;
 
 import afsp.AfspHeader;
-import afsp.AfspMethod;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
 
-import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 
@@ -15,50 +13,38 @@ import java.nio.charset.StandardCharsets;
 public class GetProcessor extends BaseProcessor {
 
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-    private final Socket socket;
+    private final SocketChannel socketChannel;
 
-    public GetProcessor(Socket socket, AfspRequest request, AfspResponse response) {
+    public GetProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
         super(request, response);
-        this.socket = socket;
+        this.socketChannel = socket;
     }
 
     public void process() throws Exception {
-        if (request.getMethod() == AfspMethod.GET) {
-            // get the file content as bytes
-            byte[] fileBytes = response.getBody().getBytes(StandardCharsets.UTF_8);
 
-
-            SocketChannel socketChannel = socket.getChannel();
-
-            if (socketChannel == null) {
-                throw new Exception("Socket channel is null");
-            }
-
-            Long contentLength = 0L;
-            int bufferSize = 0;
-
-            for (AfspHeader header : response.getheaderList()) {
-                if (header.getHeaderType() == AfspHeader.HeaderType.CONTENT_LENGTH) {
-                    contentLength = Long.parseLong(header.getHeaderContent());
-                }
-                if (header.getHeaderType() == AfspHeader.HeaderType.BUFFER_SIZE) {
-                    bufferSize = Integer.parseInt(header.getHeaderContent());
-                }
-            }
-
-            fileHandler.receiveFile(socketChannel, contentLength, bufferSize, request.getTarget());
-
-//                // read the image using javax.imageio
-//                ByteArrayInputStream bais = new ByteArrayInputStream(fileBytes);
-//                BufferedImage image = ImageIO.read(bais);
-//
-//                // save the image to the target directory as a JPEG file
-//                String filename = "example.jpg"; // replace with the actual filename
-//                String targetDirectory = System.getProperty("user.home") + File.separator + "Downloads"; // use the Downloads directory in the user's home directory
-//                Path path = Paths.get(targetDirectory, filename);
-//                ImageIO.write(image, "JPEG", path.toFile());
-
+        if (socketChannel == null) {
+            throw new Exception("Socket channel is null");
         }
+
+        Long fileSize = 0L;
+
+        for (AfspHeader header : response.getheaderList()) {
+            if (header.getHeaderType() == AfspHeader.HeaderType.FILE_SIZE) {
+                try {
+                    fileSize = Long.parseLong(header.getHeaderContent());
+                } catch (NumberFormatException e) {
+                    throw new Exception("Content length is not a valid number: " + header.getHeaderContent());
+                }
+            }
+        }
+
+        if (fileSize == 0L) {
+            throw new Exception("Content length header is missing or has a value of 0");
+        }
+
+        fileHandler.receiveFile(socketChannel, fileSize, 8192, request.getTarget());
+
+
     }
 
 

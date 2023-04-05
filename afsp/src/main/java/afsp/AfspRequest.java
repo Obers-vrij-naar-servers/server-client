@@ -20,7 +20,7 @@ public class AfspRequest extends AfspMessage {
         return method;
     }
 
-    String getRequestTarget() {
+    public String getRequestTarget() {
         return requestTarget;
     }
 
