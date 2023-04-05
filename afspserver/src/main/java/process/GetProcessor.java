@@ -11,17 +11,18 @@ import util.AfspFileHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 
 public class GetProcessor extends RequestProcessor {
 
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-    private final Socket socket;
+    private final SocketChannel channel;
 
-    public GetProcessor(AfspRequest request, AfspResponse response, Socket socket) {
+    public GetProcessor(AfspRequest request, AfspResponse response, SocketChannel channel) {
         super(request, response);
-        this.socket = socket;
+        this.channel = channel;
     }
     public void process() throws AfspProcessingException{
 
@@ -32,11 +33,7 @@ public class GetProcessor extends RequestProcessor {
 
         String target = request.getTarget();
         OutputStream out;
-        try{
-            out = socket.getOutputStream();
-        } catch (IOException e){
-            throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
-        }
+        out = Channels.newOutputStream(channel);
         AfspResponse response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
         List<AfspHeader> headerList = fileHandler.getFileInfo(target);
         response.setHeaderList(headerList);
@@ -49,11 +46,10 @@ public class GetProcessor extends RequestProcessor {
             e.printStackTrace();
         }
         try{
-            fileHandler.sendFile(target, socket.getChannel(),8192);
+            fileHandler.sendFile(target, channel,8192);
         }catch (IOException e) {
             throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
-
         done = true;
     }
 }

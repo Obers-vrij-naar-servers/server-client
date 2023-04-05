@@ -2,7 +2,7 @@ package server;
 
 import config.Configuration;
 import config.ConfigurationManager;
-import core.ServerListenerThread;
+import core.ServerChannelListenerThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public class AfspServer {
 
         try {
             System.out.println("Starting ListenerThread");
-            ServerListenerThread serverListenerThread = new ServerListenerThread(conf.getPort());
+            ServerChannelListenerThread serverListenerThread = new ServerChannelListenerThread(conf.getPort());
             serverListenerThread.start();
         } catch (Exception e) {
             e.printStackTrace();

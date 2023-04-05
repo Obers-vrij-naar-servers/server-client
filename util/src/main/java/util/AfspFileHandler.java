@@ -27,8 +27,7 @@ public class AfspFileHandler {
 
 
     public AfspFileHandler(String folder) {
-        localFileDir = "C:\\Users\\tramp\\OneDrive\\Bureaublad";
-        System.out.println("File handler created");
+        localFileDir = folder;
         updateFileList();
     }
 
@@ -45,7 +44,6 @@ public class AfspFileHandler {
         }
         return fileList;
     }
-
 
     public List<AfspHeader> getFileInfo(String fileName) throws AfspProcessingException {
 
