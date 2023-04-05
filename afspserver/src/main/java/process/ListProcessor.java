@@ -3,18 +3,26 @@ package process;
 import afsp.AfspHeader;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
+import afsp.AfspStatusCode;
 import afsp.exception.AfspProcessingException;
+import afsp.exception.AfspResponseException;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.channels.Channels;
+import java.nio.channels.SocketChannel;
 import java.util.List;
 
 public class ListProcessor extends RequestProcessor{
 
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-
-    public ListProcessor(AfspRequest request, AfspResponse response){
+    private SocketChannel channel;
+    public ListProcessor(AfspRequest request, AfspResponse response, SocketChannel _channel){
         super(request,response);
+        this.channel = _channel;
         LOGGER.info("** LIST_PROCESSOR STARTED **");
         LOGGER.info(request.toString());
     }
@@ -42,5 +50,11 @@ public class ListProcessor extends RequestProcessor{
             response.setHeaderList(fileListHeaders);
         }
         LOGGER.debug("SENDING RESPONSE: \n" + response);
+        OutputStream out = Channels.newOutputStream(channel);
+        try {
+            out.write(response.toString().getBytes());
+        } catch (IOException e) {
+            throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+        }
     }
 }

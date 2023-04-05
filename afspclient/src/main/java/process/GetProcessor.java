@@ -4,6 +4,7 @@ import afsp.AfspHeader;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
 import config.ConfigurationManager;
+import util.AfspBackupFileHandler;
 import util.AfspFileHandler;
 
 import java.nio.channels.SocketChannel;
@@ -12,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 
 public class GetProcessor extends BaseProcessor {
 
-    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+    private final AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
     private final SocketChannel socketChannel;
 
     public GetProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
@@ -42,10 +43,11 @@ public class GetProcessor extends BaseProcessor {
         if (fileSize == 0L) {
             throw new Exception("Content length header is missing or has a value of 0");
         }
-
-        fileHandler.receiveFile(socketChannel, fileSize, 8192, request.getTarget());
-
-
+        var identifier = response.getheaderList().stream().filter(h -> h.getHeaderType() == AfspHeader.HeaderType.IDENTIFIER).findFirst().orElse(null);
+        if (identifier == null){
+            throw new Exception("Identifier is not valid");
+        }
+        fileHandler.receiveFile(socketChannel, fileSize, 8192, request.getTarget(),identifier.getHeaderContent());
     }
 
 

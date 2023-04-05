@@ -30,8 +30,6 @@ public class ServerChannelListenerThread  extends Thread{
                 LOGGER.info(" * Connection accepted: " + channel.getLocalAddress());
                 AfspConnectionWorkerThreadChanneled workerThread = new AfspConnectionWorkerThreadChanneled(channel);
                 workerThread.start();
-
-
             } catch (IOException e) {
                 LOGGER.error("Error in listenerThread", e);
             }

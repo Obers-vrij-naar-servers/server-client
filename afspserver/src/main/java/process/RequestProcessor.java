@@ -3,6 +3,7 @@ package process;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
 import afsp.exception.AfspProcessingException;
+import afsp.exception.AfspResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
