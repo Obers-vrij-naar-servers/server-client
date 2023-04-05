@@ -84,6 +84,10 @@ public class AfspHeader {
             public String toString() {
                 return "Identifier";
             }
+        },
+        KEEP_ALIVE{
+            @Override
+            public String toString(){return "Connection"; }
         };
     }
 
