@@ -64,7 +64,7 @@ public class PromptHandler {
             }
 
             if (request.getMethod() == AfspMethod.DELETE) {
-                new DeleteProcessor(socketChannel.socket(), request, response);
+                new DeleteProcessor(socketChannel, request, response);
             }
 
             try {
