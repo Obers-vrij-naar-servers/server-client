@@ -35,8 +35,7 @@ public class Prompt {
         int selectedAction = 0;
 
         if (firstPrompt) {
-            System.out.println("\u001B[36m" + "Gets the list of files on the server first:" + "\u001B[0m");
-
+            promptResponse.setAction(actions[0]);
         } else {
             System.out.println();
             System.out.println("\u001B[33m" + "Press enter to continue... " + "\u001B[0m");
@@ -67,8 +66,6 @@ public class Prompt {
             }
             promptResponse.setAction(actions[selectedAction - 1]);
         }
-
-        promptResponse.setAction(actions[0]);
 
         if (promptResponse.getAction() == Action.Download_FILE) {
             downloadFollowUp(scannerInput);
