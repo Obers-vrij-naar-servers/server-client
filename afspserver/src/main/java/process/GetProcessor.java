@@ -23,22 +23,30 @@ public class GetProcessor extends RequestProcessor {
     public GetProcessor(AfspRequest request, AfspResponse response, SocketChannel channel) {
         super(request, response);
         this.channel = channel;
+        LOGGER.debug("REQUEST:\n" + request);
     }
-    public void process() throws AfspProcessingException{
+    public void process() throws AfspProcessingException {
 
         //validate headers
         if (!request.containsHeaders(AfspHeader.HeaderType.BUFFER_SIZE,AfspHeader.HeaderType.CHARSET,AfspHeader.HeaderType.TIME_OUT)){
             throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
         }
 
+        var bufferSizeHeader = request.getHeaderList().stream().filter(h -> h.getHeaderType() == AfspHeader.HeaderType.BUFFER_SIZE).findFirst().map(AfspHeader.class::cast).orElse(null);
+        int bufferSize;
+        try{
+            bufferSize = Integer.parseInt(bufferSizeHeader.getHeaderContent());
+        } catch (NullPointerException e){
+            throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+        }
+
         String target = request.getTarget();
-        OutputStream out;
-        out = Channels.newOutputStream(channel);
+
+        var out = Channels.newOutputStream(channel);
         AfspResponse response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
         List<AfspHeader> headerList = fileHandler.getFileInfo(target);
         response.setHeaderList(headerList);
         LOGGER.info(response.toString());
-
         try {
             out.write(response.toString().getBytes());
         } catch (IOException e) {
@@ -46,8 +54,8 @@ public class GetProcessor extends RequestProcessor {
             e.printStackTrace();
         }
         try{
-            fileHandler.sendFile(target, channel,8192);
-        }catch (IOException e) {
+            fileHandler.sendFile(target, channel,bufferSize);
+        }catch (IOException | InterruptedException e) {
             throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
         done = true;

@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.channels.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -77,13 +78,12 @@ public class AfspFileHandler {
         return headers;
     }
 
-    public void sendFile(String fileName, SocketChannel channel,int bufferSize) throws IOException {
+    public void sendFile(String fileName, SocketChannel channel,int bufferSize) throws IOException, InterruptedException {
         LOGGER.info(" ** SENDING: " + localFileDir + FileSystems.getDefault().getSeparator() + fileName);
         long bytesWritten = 0;
         RandomAccessFile reader = new RandomAccessFile(localFileDir + FileSystems.getDefault().getSeparator() + fileName,"r");
         FileChannel fileChannel = reader.getChannel();
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
-
         while (fileChannel.read(buffer) > 0){
             channel.write(buffer);
             bytesWritten += buffer.limit();
@@ -93,23 +93,31 @@ public class AfspFileHandler {
     }
 
     public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName) throws IOException {
+        LOGGER.debug("FILESIZE:"+fileSize);
         Path path = Path.of(getFullPath(fileName));
         FileChannel fileChannel = FileChannel.open(path.toAbsolutePath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
-
+        ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
+        LOGGER.debug("BUFFERSIZE:"+bufferSize);
+        long bytesWritten  = 0;
+        long bytesRead = 0; // add this variable to keep track of the total number of bytes read
         while (fileSize > 0) {
-            int bytesRead = channel.read(buffer);
-            if (bytesRead == -1) {
+            LOGGER.debug("FILESIZE:" + fileSize);
+            int bytesReceived = channel.read(buffer);
+            LOGGER.debug("bytesReceived:" + bytesReceived);
+            if (bytesReceived == -1) {
                 break;
             }
-            fileSize -= bytesRead;
+            bytesRead += bytesReceived; // update the total number of bytes read
+            fileSize -= bytesReceived;
             buffer.flip();
-            fileChannel.write(buffer);
+            int bytesWrittenThisIteration = fileChannel.write(buffer);
+            bytesWritten += bytesWrittenThisIteration;
+            LOGGER.debug("BYTES WRITTEN SO FAR" + bytesWritten);
             buffer.clear();
+            LOGGER.debug("BUFFER CLEARED");
         }
-
+        LOGGER.debug("EXITING LOOP");
         // close the file channel
-        fileChannel.close();
 
         try {
             // read the file content from the channel into a ByteBuffer
@@ -130,6 +138,7 @@ public class AfspFileHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
 
