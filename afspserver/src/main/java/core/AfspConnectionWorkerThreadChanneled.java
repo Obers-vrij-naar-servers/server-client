@@ -36,7 +36,8 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
             response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
             if (request.getMethod() == AfspMethod.LIST) {
                 LOGGER.info(" ** PROCESSING LIST **");
-                processor = new ListProcessor(request, response);
+                processor = new ListProcessor(request, response, channel);
+                processor.process();
             }
             if (request.getMethod() == AfspMethod.GET) {
                 LOGGER.info(" ** PROCESSING GET **");
@@ -46,11 +47,16 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
                 throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
             }
             processor.process();
-            OutputStream out = Channels.newOutputStream(channel);
-            out.write(response.toString().getBytes());
 
-        } catch (AfspParsingException | IOException | AfspProcessingException e) {
-            e.printStackTrace();
+
+        } catch (AfspParsingException | AfspProcessingException e) {
+            OutputStream out = Channels.newOutputStream(channel);
+            try {
+                out.write(new AfspResponse(e.getErrorCode()).toString().getBytes());
+            } catch (IOException ex) {
+                e.printStackTrace();
+            }
+
         }
 
     }

@@ -6,6 +6,7 @@ import afsp.AfspResponse;
 import afsp.AfspStatusCode;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
+import util.AfspBackupFileHandler;
 import util.AfspFileHandler;
 
 import java.io.IOException;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class GetProcessor extends RequestProcessor {
 
-    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+    private final AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
     private final SocketChannel channel;
 
     public GetProcessor(AfspRequest request, AfspResponse response, SocketChannel channel) {
@@ -53,9 +54,10 @@ public class GetProcessor extends RequestProcessor {
             //TODO HANDLE ERROR
             e.printStackTrace();
         }
+        //    public static void sendFile( String fileName, int bufferSize, SocketChannel socketChannel) throws IOException {
         try{
-            fileHandler.sendFile(target, channel,bufferSize);
-        }catch (IOException | InterruptedException e) {
+            fileHandler.sendFile(target, bufferSize, channel);
+        }catch (IOException e) {
             throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
         done = true;
