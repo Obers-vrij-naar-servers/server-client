@@ -8,19 +8,16 @@ import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
 import afsp.exception.AfspResponseException;
 import config.Configuration;
-import config.ConfigurationManager;
 import factory.RequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import process.*;
-import util.AfspFileHandler;
 import util.Helper;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.List;
 
 public class PromptHandler {
 
@@ -28,7 +25,6 @@ public class PromptHandler {
     private final Configuration conf;
     private final RequestFactory requestFactory = new RequestFactory();
     private BaseProcessor processor;
-    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     public PromptHandler(Configuration conf) {
         this.conf = conf;

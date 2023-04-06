@@ -6,7 +6,7 @@ import config.ConfigurationManager;
 import core.ServerChannelListenerThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.AfspFileHandler;
+import util.AfspBackupFileHandler;
 
 /**
  * Driver Class for the AFSP-Server
@@ -18,7 +18,7 @@ public class AfspServer {
     public static void main(String[] args) {
         ConfigurationManager.getInstance().initConfiguration(args);
         Configuration conf = ConfigurationManager.getInstance().getCurrentConfiguration();
-        AfspFileHandler fileHandler = new AfspFileHandler(conf.getFolder());
+        AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(conf.getFolder());
 
         LOGGER.info("Server Starting...");
         LOGGER.info("Using Mode: " + (conf.getDebug() ? "Debug" : "Production"));
