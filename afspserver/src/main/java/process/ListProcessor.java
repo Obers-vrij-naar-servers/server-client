@@ -6,7 +6,7 @@ import afsp.AfspResponse;
 import afsp.AfspStatusCode;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
-import util.AfspBackupFileHandler;
+import util.AfspFileHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ListProcessor extends RequestProcessor{
 
-    private final AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
     public ListProcessor(AfspRequest request, AfspResponse response, SocketChannel channel){
         super(request,response, channel);
         LOGGER.info("** LIST_PROCESSOR STARTED **");
@@ -25,7 +25,7 @@ public class ListProcessor extends RequestProcessor{
 
     public void process() throws AfspProcessingException {
         String target = request.getTarget();
-        List<String> _list = null;
+        List<String> _list;
         if (target.equals("/") || target.equals("\"") || target.equals(".")) {
             _list = fileHandler.getFileList();
 

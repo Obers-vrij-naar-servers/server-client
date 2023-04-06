@@ -5,7 +5,7 @@ import afsp.AfspResponse;
 import afsp.AfspStatusCode;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
-import util.AfspBackupFileHandler;
+import util.AfspFileHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,7 +21,7 @@ public class DeleteProcessor extends RequestProcessor{
 
     @Override
     public void process() throws AfspProcessingException {
-        AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+        AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
         OutputStream out = Channels.newOutputStream(channel);
         try {
             fileHandler.deleteFile(request.getTarget());

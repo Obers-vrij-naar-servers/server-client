@@ -6,7 +6,7 @@ import afsp.AfspResponse;
 import afsp.AfspStatusCode;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
-import util.AfspBackupFileHandler;
+import util.AfspFileHandler;
 
 import java.io.IOException;
 import java.nio.channels.Channels;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class GetProcessor extends RequestProcessor {
 
-    private final AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
     public GetProcessor(AfspRequest request, AfspResponse response, SocketChannel channel) {
         super(request, response, channel);
         LOGGER.debug("REQUEST:\n" + request);

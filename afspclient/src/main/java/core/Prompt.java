@@ -8,7 +8,6 @@ import java.util.Scanner;
 public class Prompt {
 
     private final PromptResponse promptResponse = new PromptResponse();
-    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     private final PromptHandler promptHandler;
     private boolean firstPrompt = true;
