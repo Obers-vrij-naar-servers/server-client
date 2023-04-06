@@ -78,18 +78,21 @@ public class AfspFileHandler {
         return headers;
     }
 
-    public void sendFile(String fileName, SocketChannel channel,int bufferSize) throws IOException, InterruptedException {
-        LOGGER.info(" ** SENDING: " + localFileDir + FileSystems.getDefault().getSeparator() + fileName);
-        long bytesWritten = 0;
-        RandomAccessFile reader = new RandomAccessFile(localFileDir + FileSystems.getDefault().getSeparator() + fileName,"r");
-        FileChannel fileChannel = reader.getChannel();
+    public void sendFile( String fileName, int bufferSize, SocketChannel socketChannel) throws IOException {
+        Path filePath = Paths.get(localFileDir+ "/" + fileName);
+        System.out.print("\033[3m\u001B[37mSending file to " + socketChannel.socket().getInetAddress().toString().substring(1) + ": \u001B[0m" + fileName + "...");
+
+        FileChannel fileChannel = FileChannel.open(filePath);
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
-        while (fileChannel.read(buffer) > 0){
-            channel.write(buffer);
-            bytesWritten += buffer.limit();
+
+        while (fileChannel.read(buffer) > 0) {
+
+            buffer.flip();
+            socketChannel.write(buffer);
             buffer.clear();
+
         }
-        fileChannel.close();
+        System.out.print("\u001B[32m\033[1m SUCCESS!!\u001B[0m\n");
     }
 
     public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName, String identifier) throws IOException, AfspParsingException {
@@ -100,6 +103,8 @@ public class AfspFileHandler {
         if(!Files.exists(Paths.get(localFileDir))) {
             Files.createDirectories(Paths.get(localFileDir));
         }
+
+        System.out.print("\033[3m\u001B[37mDownloading file: \u001B[0m" + fileName + "...");
 
         long bytesWritten = 0;
         int progress = 0;
@@ -146,6 +151,20 @@ public class AfspFileHandler {
         Files.setAttribute(filePath, "basic:lastModifiedTime", lastModifiedTime, LinkOption.NOFOLLOW_LINKS);
 
         System.out.println("\u001B[32m\033[1mSUCCESS!!\u001B[0m");
+    }
+
+    public void deleteFile(String targetFile) throws AfspProcessingException {
+        Path path = Path.of(localFileDir+"/"+targetFile);
+        if(Files.exists(path)) {
+            try {
+                // Attempt to delete the file
+                Files.delete(path);
+            } catch (IOException e) {
+                throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_404_NOT_FOUND);
+        }
     }
 
     private String getFullPath(String fileName){
