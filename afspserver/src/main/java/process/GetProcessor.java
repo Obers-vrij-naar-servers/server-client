@@ -16,11 +16,8 @@ import java.util.List;
 public class GetProcessor extends RequestProcessor {
 
     private final AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-    private final SocketChannel channel;
-
     public GetProcessor(AfspRequest request, AfspResponse response, SocketChannel channel) {
-        super(request, response);
-        this.channel = channel;
+        super(request, response, channel);
         LOGGER.debug("REQUEST:\n" + request);
     }
     public void process() throws AfspProcessingException {

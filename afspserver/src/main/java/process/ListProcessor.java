@@ -17,10 +17,8 @@ import java.util.List;
 public class ListProcessor extends RequestProcessor{
 
     private final AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-    private final SocketChannel channel;
-    public ListProcessor(AfspRequest request, AfspResponse response, SocketChannel _channel){
-        super(request,response);
-        this.channel = _channel;
+    public ListProcessor(AfspRequest request, AfspResponse response, SocketChannel channel){
+        super(request,response, channel);
         LOGGER.info("** LIST_PROCESSOR STARTED **");
         LOGGER.info(request.toString());
     }
