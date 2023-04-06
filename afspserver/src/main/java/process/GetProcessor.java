@@ -7,11 +7,8 @@ import afsp.AfspStatusCode;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
 import util.AfspBackupFileHandler;
-import util.AfspFileHandler;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
 import java.util.List;

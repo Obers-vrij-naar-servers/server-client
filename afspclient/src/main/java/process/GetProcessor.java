@@ -5,10 +5,8 @@ import afsp.AfspRequest;
 import afsp.AfspResponse;
 import config.ConfigurationManager;
 import util.AfspBackupFileHandler;
-import util.AfspFileHandler;
 
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 
 
 public class GetProcessor extends BaseProcessor {

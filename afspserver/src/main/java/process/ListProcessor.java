@@ -5,21 +5,19 @@ import afsp.AfspRequest;
 import afsp.AfspResponse;
 import afsp.AfspStatusCode;
 import afsp.exception.AfspProcessingException;
-import afsp.exception.AfspResponseException;
 import config.ConfigurationManager;
-import util.AfspFileHandler;
+import util.AfspBackupFileHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 
 public class ListProcessor extends RequestProcessor{
 
-    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-    private SocketChannel channel;
+    private final AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+    private final SocketChannel channel;
     public ListProcessor(AfspRequest request, AfspResponse response, SocketChannel _channel){
         super(request,response);
         this.channel = _channel;

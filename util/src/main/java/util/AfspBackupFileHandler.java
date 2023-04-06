@@ -22,7 +22,7 @@ import java.util.List;
 public class AfspBackupFileHandler {
 
     //SENDFILE AND RECEIVEFILE implemented by ROB
-    private final Logger LOGGER = LoggerFactory.getLogger(AfspFileHandler.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(AfspBackupFileHandler.class);
 
     private String localFileDir;
     private List<String> fileList = new ArrayList<>();
@@ -38,7 +38,12 @@ public class AfspBackupFileHandler {
             fileList = Arrays.asList(file.list());
         }
     }
-
+    public List<String> getFileList() throws AfspProcessingException {
+        if (fileList == null || fileList.size() == 0){
+            throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_404_NOT_FOUND);
+        }
+        return fileList;
+    }
     public void sendFile( String fileName, int bufferSize, SocketChannel socketChannel) throws IOException {
         Path filePath = Paths.get(localFileDir+ "/" + fileName);
         System.out.print("\033[3m\u001B[37mSending file to " + socketChannel.socket().getInetAddress().toString().substring(1) + ": \u001B[0m" + fileName + "...");
