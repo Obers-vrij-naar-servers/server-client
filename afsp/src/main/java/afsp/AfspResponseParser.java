@@ -122,6 +122,9 @@ public class AfspResponseParser {
         }
         LOGGER.info(" ** PARSING BODY DONE **");
 
+        if(bodyBuffer.length() == 0){
+            return;
+        }
         String body = bodyBuffer.toString();
         response.setBody(body);
         LOGGER.info(response.toString());

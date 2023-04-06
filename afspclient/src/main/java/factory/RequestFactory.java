@@ -53,6 +53,15 @@ public class RequestFactory {
             }
             case DELETE_FILE_FROM_SERVER -> {
                 setMethod(request, "DELETE");
+                headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
+
+                if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
+                    List<FileInfo> targets = AfspFileHandler.getTargetFiles();
+
+                    request.setRequestTarget(targets.get(AfspFileHandler.getFileChoice()).getFileName());
+                } else {
+                    throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                }
             }
 
             case EXIT -> {
