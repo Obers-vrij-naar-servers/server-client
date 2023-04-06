@@ -43,6 +43,9 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
                 LOGGER.info(" ** PROCESSING GET **");
                 processor = new GetProcessor(request, response, channel);
             }
+            if(request.getMethod()==AfspMethod.DELETE){
+
+            }
             if (processor == null){
                 throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
             }

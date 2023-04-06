@@ -149,4 +149,18 @@ public class AfspBackupFileHandler {
         headers.add(identifierHeader);
         return headers;
     }
+
+    public void deleteFile(String targetFile) throws AfspProcessingException {
+        Path path = Path.of(localFileDir+"/"+targetFile);
+        if(Files.exists(path)) {
+            try {
+                // Attempt to delete the file
+                Files.delete(path);
+            } catch (IOException e) {
+                throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_404_NOT_FOUND);
+        }
+    }
 }

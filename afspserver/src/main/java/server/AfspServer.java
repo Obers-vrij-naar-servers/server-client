@@ -24,11 +24,6 @@ public class AfspServer {
         LOGGER.info("Using Mode: " + (conf.getDebug() ? "Debug" : "Production"));
         LOGGER.info("Using Port: " + conf.getPort());
         LOGGER.info("Using Folder: " + conf.getFolder());
-        try {
-            LOGGER.info("FILES:"+fileHandler.getFileList().toString());
-        } catch (AfspProcessingException e) {
-            e.printStackTrace();
-        }
 
         try {
             System.out.println("Starting ListenerThread");
