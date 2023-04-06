@@ -5,15 +5,11 @@ import afsp.exception.AfspProcessingException;
 import afsp.AfspStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.channels.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -25,6 +21,8 @@ public class AfspFileHandler {
 
     private String localFileDir;
     private List<String> fileList = new ArrayList<>();
+    private static List<String> targetFiles;
+    private static int fileChoice;
 
     public AfspFileHandler(String folder) {
         localFileDir = folder;
@@ -148,6 +146,19 @@ public class AfspFileHandler {
         return localFileDir + FileSystems.getDefault().getSeparator() + fileName;
     }
 
+    public static int getFileChoice() {
+        return fileChoice;
+    }
 
+    public static void setFileChoice(int fileChoice) {
+        AfspFileHandler.fileChoice = fileChoice;
+    }
 
+    public static List<String> getTargetFiles() {
+        return targetFiles;
+    }
+
+    public static void setTargetFiles(List<String> files) {
+        AfspFileHandler.targetFiles = files;
+    }
 }

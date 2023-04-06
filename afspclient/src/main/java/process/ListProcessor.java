@@ -3,6 +3,8 @@ package process;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
 import afsp.exception.AfspProcessingException;
+import config.ConfigurationManager;
+import util.AfspFileHandler;
 
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
@@ -12,6 +14,8 @@ import static afsp.AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR;
 
 public class ListProcessor extends BaseProcessor {
     List<String> files;
+
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     public ListProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
         super(request, response);
@@ -41,7 +45,7 @@ public class ListProcessor extends BaseProcessor {
             }
 
 
-            ProcessResult.setFiles(files);
+            AfspFileHandler.setTargetFiles(files);
 
         } catch (Exception e) {
             throw new AfspProcessingException(SERVER_ERROR_500_INTERNAL_SERVER_ERROR);

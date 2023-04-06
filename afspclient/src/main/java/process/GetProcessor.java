@@ -44,6 +44,7 @@ public class GetProcessor extends BaseProcessor {
             throw new Exception("Content length header is missing or has a value of 0");
         }
         var identifier = response.getheaderList().stream().filter(h -> h.getHeaderType() == AfspHeader.HeaderType.IDENTIFIER).findFirst().orElse(null);
+
         if (identifier == null){
             throw new Exception("Identifier is not valid");
         }
