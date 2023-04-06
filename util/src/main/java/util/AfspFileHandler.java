@@ -1,6 +1,7 @@
 package util;
 
 import afsp.AfspHeader;
+import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
 import afsp.AfspStatusCode;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +23,7 @@ public class AfspFileHandler {
 
     private String localFileDir;
     private List<String> fileList = new ArrayList<>();
-    private static List<String> targetFiles;
+    private static List<FileInfo> targetFiles;
     private static int fileChoice;
 
     public AfspFileHandler(String folder) {
@@ -90,57 +92,61 @@ public class AfspFileHandler {
         fileChannel.close();
     }
 
-    public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName) throws IOException {
-        LOGGER.debug("FILESIZE:"+fileSize);
-        Path path = Path.of(getFullPath(fileName));
-        FileChannel fileChannel = FileChannel.open(path.toAbsolutePath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-        ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
-        LOGGER.debug("BUFFERSIZE:"+bufferSize);
-        long bytesWritten  = 0;
-        long bytesRead = 0; // add this variable to keep track of the total number of bytes read
-        while (fileSize > 0) {
-            LOGGER.debug("FILESIZE:" + fileSize);
-            int bytesReceived = channel.read(buffer);
-            LOGGER.debug("bytesReceived:" + bytesReceived);
-            if (bytesReceived == -1) {
+    public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName, String identifier) throws IOException, AfspParsingException {
+
+        Path filePath = Paths.get(localFileDir+ "/" + fileName);
+
+        // Mocht de Files-folder zijn verwijderd, maakt hij eerst een nieuwe aan.
+        if(!Files.exists(Paths.get(localFileDir))) {
+            Files.createDirectories(Paths.get(localFileDir));
+        }
+
+        long bytesWritten = 0;
+        int progress = 0;
+        int dotCount = 0;
+        long tenPercent = fileSize / 10;
+
+        // Maak de benodigde mappen aan
+        Files.createDirectories(filePath.getParent());
+
+        FileChannel fileChannel = FileChannel.open(filePath.toAbsolutePath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+
+        while (channel.read(buffer) != -1) {
+            buffer.flip();
+            fileChannel.write(buffer);
+            bytesWritten += buffer.limit();
+            buffer.clear();
+
+            int newProgress = (int) ((bytesWritten * 100) / fileSize);
+            if (newProgress > progress) {
+                progress = newProgress;
+                if (bytesWritten >= (tenPercent * dotCount)) {
+                    System.out.print(".");
+                    dotCount++;
+                }
+            }
+
+            if (fileChannel.size() >= fileSize) {
                 break;
             }
-            bytesRead += bytesReceived; // update the total number of bytes read
-            fileSize -= bytesReceived;
-            buffer.flip();
-            int bytesWrittenThisIteration = fileChannel.write(buffer);
-            bytesWritten += bytesWrittenThisIteration;
-            LOGGER.debug("BYTES WRITTEN SO FAR" + bytesWritten);
-            buffer.clear();
-            LOGGER.debug("BUFFER CLEARED");
-        }
-        LOGGER.debug("EXITING LOOP");
-        // close the file channel
-
-        try {
-            // read the file content from the channel into a ByteBuffer
-            ByteBuffer fileContent = ByteBuffer.allocate((int) Files.size(path));
-            fileChannel = FileChannel.open(path.toAbsolutePath(), StandardOpenOption.READ);
-            fileChannel.read(fileContent);
-            fileContent.flip();
-
-            // convert the ByteBuffer into a string using the appropriate character set
-            String content = StandardCharsets.UTF_8.decode(fileContent).toString();
-
-            // write the string to a file using a FileWriter, and flush the content to make sure it is written to the file
-            File output = new File(getFullPath(fileName + ".txt"));
-            FileWriter fileWriter = new FileWriter(output);
-            fileWriter.write(content);
-            fileWriter.flush();
-            fileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
+        long fileSizeClient = Files.size(filePath);
+
+        if (fileSize != fileSizeClient) {
+            fileChannel.close();
+            Files.delete(filePath);
+            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+        }
+
+        fileChannel.close();
+
+        FileTime lastModifiedTime = FileTime.fromMillis(Long.parseLong(identifier));
+        Files.setAttribute(filePath, "basic:lastModifiedTime", lastModifiedTime, LinkOption.NOFOLLOW_LINKS);
+
+        System.out.println("\u001B[32m\033[1mSUCCESS!!\u001B[0m");
     }
-
-
-
 
     private String getFullPath(String fileName){
         return localFileDir + FileSystems.getDefault().getSeparator() + fileName;
@@ -154,11 +160,11 @@ public class AfspFileHandler {
         AfspFileHandler.fileChoice = fileChoice;
     }
 
-    public static List<String> getTargetFiles() {
+    public static List<FileInfo> getTargetFiles() {
         return targetFiles;
     }
 
-    public static void setTargetFiles(List<String> files) {
-        AfspFileHandler.targetFiles = files;
+    public static void setTargetFiles(List<FileInfo> targetFiles) {
+        AfspFileHandler.targetFiles = targetFiles;
     }
 }

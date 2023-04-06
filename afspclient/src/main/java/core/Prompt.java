@@ -82,13 +82,13 @@ public class Prompt {
     private void deleteFollowUp(Scanner scanner) {
         System.out.println("\u001B[34m" + "Select a file to delete by number: " + "\u001B[0m");
         System.out.println();
-        for (int i = 0; i < fileHandler.getTargetFiles().size(); i++) {
-            System.out.println((i + 1) + ". " + fileHandler.getTargetFiles().get(i));
+        for (int i = 0; i < AfspFileHandler.getTargetFiles().size(); i++) {
+            System.out.println((i + 1) + ". " + AfspFileHandler.getTargetFiles().get(i).getFileName());
         }
         scanner.nextLine();
 
         if (scanner.hasNextInt()) {
-            fileHandler.setFileChoice(scanner.nextInt() - 1);
+            AfspFileHandler.setFileChoice(scanner.nextInt() - 1);
         }
     }
 
@@ -96,13 +96,13 @@ public class Prompt {
     private void downloadFollowUp(Scanner scanner) {
         System.out.println("\u001B[34m" + "Select a file to download by number: " + "\u001B[0m");
         System.out.println();
-        for (int i = 0; i < fileHandler.getTargetFiles().size(); i++) {
-            System.out.println((i + 1) + ". " + fileHandler.getTargetFiles().get(i));
+        for (int i = 0; i < AfspFileHandler.getTargetFiles().size(); i++) {
+            System.out.println((i + 1) + ". " + AfspFileHandler.getTargetFiles().get(i).getFileName());
         }
         scanner.nextLine();
 
         if (scanner.hasNextInt()) {
-            fileHandler.setFileChoice(scanner.nextInt() - 1);
+            AfspFileHandler.setFileChoice(scanner.nextInt() - 1);
         }
     }
 

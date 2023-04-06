@@ -7,11 +7,10 @@ import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
 import core.PromptResponse;
-import process.ProcessResult;
 import util.AfspFileHandler;
+import util.FileInfo;
 
 import java.util.List;
-import java.util.logging.FileHandler;
 
 
 public class RequestFactory {
@@ -37,9 +36,9 @@ public class RequestFactory {
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
 
                 if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
-                    List<String> targets = AfspFileHandler.getTargetFiles();
-                    request.setRequestTarget(targets.get(AfspFileHandler.getFileChoice()));
-                    System.out.println("\u001B[36m" + "Downloading file: " + targets.get(AfspFileHandler.getFileChoice()) + "...." + "\u001B[0m");
+                    List<FileInfo> targets = AfspFileHandler.getTargetFiles();
+
+                    request.setRequestTarget(targets.get(AfspFileHandler.getFileChoice()).getFileName());
                 } else {
                     throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
