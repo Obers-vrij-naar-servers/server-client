@@ -5,8 +5,10 @@ import afsp.AfspRequest;
 import afsp.AfspStatusCode;
 import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
+import config.ConfigurationManager;
 import core.PromptResponse;
-import process.ProcessResult;
+import util.AfspFileHandler;
+import util.FileInfo;
 
 import java.util.List;
 
@@ -15,6 +17,7 @@ public class RequestFactory {
 
     public RequestFactory() {
     }
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     public AfspRequest createRequest(PromptResponse promptResponse) throws IllegalArgumentException, AfspParsingException, AfspProcessingException {
         AfspRequest request = new AfspRequest();
@@ -32,10 +35,10 @@ public class RequestFactory {
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.BUFFER_SIZE)).setHeaderContent("8192"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
 
-                if (ProcessResult.getFiles() != null && ProcessResult.getFiles().size() > 0) {
-                    List<String> targets = ProcessResult.getFiles();
-                    request.setRequestTarget(targets.get(ProcessResult.getFileChoice()));
-                    System.out.println("\u001B[36m" + "Downloading file: " + targets.get(ProcessResult.getFileChoice()) + "...." + "\u001B[0m");
+                if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
+                    List<FileInfo> targets = AfspFileHandler.getTargetFiles();
+
+                    request.setRequestTarget(targets.get(AfspFileHandler.getFileChoice()).getFileName());
                 } else {
                     throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }

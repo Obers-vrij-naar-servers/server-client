@@ -1,14 +1,15 @@
 package core;
 
 import config.Configuration;
-import process.ProcessResult;
-
-import java.io.IOException;
+import config.ConfigurationManager;
+import util.AfspFileHandler;
 import java.util.Scanner;
 
 public class Prompt {
 
     private final PromptResponse promptResponse = new PromptResponse();
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+
     private final PromptHandler promptHandler;
     private boolean firstPrompt = true;
     private boolean ready = false;
@@ -81,13 +82,13 @@ public class Prompt {
     private void deleteFollowUp(Scanner scanner) {
         System.out.println("\u001B[34m" + "Select a file to delete by number: " + "\u001B[0m");
         System.out.println();
-        for (int i = 0; i < ProcessResult.getFiles().size(); i++) {
-            System.out.println((i + 1) + ". " + ProcessResult.getFiles().get(i));
+        for (int i = 0; i < AfspFileHandler.getTargetFiles().size(); i++) {
+            System.out.println((i + 1) + ". " + AfspFileHandler.getTargetFiles().get(i).getFileName());
         }
         scanner.nextLine();
 
         if (scanner.hasNextInt()) {
-            ProcessResult.setFileChoice(scanner.nextInt() - 1);
+            AfspFileHandler.setFileChoice(scanner.nextInt() - 1);
         }
     }
 
@@ -95,13 +96,13 @@ public class Prompt {
     private void downloadFollowUp(Scanner scanner) {
         System.out.println("\u001B[34m" + "Select a file to download by number: " + "\u001B[0m");
         System.out.println();
-        for (int i = 0; i < ProcessResult.getFiles().size(); i++) {
-            System.out.println((i + 1) + ". " + ProcessResult.getFiles().get(i));
+        for (int i = 0; i < AfspFileHandler.getTargetFiles().size(); i++) {
+            System.out.println((i + 1) + ". " + AfspFileHandler.getTargetFiles().get(i).getFileName());
         }
         scanner.nextLine();
 
         if (scanner.hasNextInt()) {
-            ProcessResult.setFileChoice(scanner.nextInt() - 1);
+            AfspFileHandler.setFileChoice(scanner.nextInt() - 1);
         }
     }
 
