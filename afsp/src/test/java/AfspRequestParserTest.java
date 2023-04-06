@@ -5,7 +5,10 @@
 //import org.junit.jupiter.api.TestInstance;
 //
 //import java.io.ByteArrayInputStream;
+//import java.io.IOException;
 //import java.io.InputStream;
+//import java.net.Socket;
+//import java.nio.channels.SocketChannel;
 //import java.nio.charset.StandardCharsets;
 //
 //import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +30,7 @@
 //        try{
 //            AfspRequest request = afspParser.parseAfspRequest(generateValidGETTestCase());
 //            assertEquals(request.getMethod(), AfspMethod.GET);
-//        } catch (AfspParsingException e){
+//        } catch (AfspParsingException | IOException e){
 //            fail(e);
 //        }
 //    }
@@ -38,6 +41,8 @@
 //            fail();
 //        } catch (AfspParsingException e){
 //            assertEquals(e.getErrorCode(), AfspStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED);
+//        } catch (IOException e) {
+//            fail();
 //        }
 //    }
 //    @Test
@@ -47,6 +52,8 @@
 //            fail();
 //        } catch (AfspParsingException e){
 //            assertEquals(e.getErrorCode(), AfspStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED);
+//        } catch (IOException e) {
+//            fail();
 //        }
 //
 //    }
@@ -57,6 +64,8 @@
 //            fail();
 //        } catch (AfspParsingException e){
 //            assertEquals(e.getErrorCode(), AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+//        } catch (IOException e) {
+//            fail(e);
 //        }
 //
 //    }
@@ -67,6 +76,8 @@
 //            fail();
 //        } catch (AfspParsingException e){
 //            assertEquals(e.getErrorCode(), AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+//        } catch (IOException e) {
+//            fail(e);
 //        }
 //
 //    }
@@ -77,18 +88,20 @@
 //            fail();
 //        } catch (AfspParsingException e){
 //            assertEquals(e.getErrorCode(), AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+//        } catch (IOException e) {
+//            fail();
 //        }
 //
 //    }
 //
 //
-//    private InputStream generateValidGETTestCase() {
+//    private SocketChannel generateValidGETTestCase() throws IOException {
 //        String rawDataString = "GET /hello.htm AFSP/1.0\r\n" +
 //                "Content-length: 8192\r\n";
 //        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return inputStream;
+//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
 //    }
-//    private InputStream generateInvalidGETTestCase() {
+//    private SocketChannel generateInvalidGETTestCase() throws IOException {
 //        String rawDataString = "GeT /hello.htm AFSP/1.0\r\n" +
 //                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
 //                "Host: www.tutorialspoint.com\r\n" +
@@ -96,9 +109,9 @@
 //                "Accept-Encoding: gzip, deflate\r\n" +
 //                "Connection: Keep-Alive";
 //        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return inputStream;
+//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
 //    }
-//    private InputStream generateInvalidRequestTypeTestCase() {
+//    private SocketChannel generateInvalidRequestTypeTestCase() throws IOException {
 //        String rawDataString = "GETTETTETT /hello.htm AFSP/1.0\r\n" +
 //                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
 //                "Host: www.tutorialspoint.com\r\n" +
@@ -106,9 +119,9 @@
 //                "Accept-Encoding: gzip, deflate\r\n" +
 //                "Connection: Keep-Alive";
 //        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return inputStream;
+//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
 //    }
-//    private InputStream generateInvalidRequestItemsTestCase() {
+//    private SocketChannel generateInvalidRequestItemsTestCase() throws IOException {
 //        String rawDataString = "GET /first /hello.htm AFSP/1.0\r\n" +
 //                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
 //                "Host: www.tutorialspoint.com\r\n" +
@@ -116,9 +129,9 @@
 //                "Accept-Encoding: gzip, deflate\r\n" +
 //                "Connection: Keep-Alive";
 //        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return inputStream;
+//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
 //    }
-//    private InputStream generateEmptyRequestLineTestCase() {
+//    private SocketChannel generateEmptyRequestLineTestCase() throws IOException {
 //        String rawDataString = "\r\n" +
 //                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
 //                "Host: www.tutorialspoint.com\r\n" +
@@ -126,9 +139,9 @@
 //                "Accept-Encoding: gzip, deflate\r\n" +
 //                "Connection: Keep-Alive";
 //        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return inputStream;
+//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
 //    }
-//    private InputStream generateOnlyCRnoLFTestCase() {
+//    private SocketChannel generateOnlyCRnoLFTestCase() throws IOException {
 //        String rawDataString = "GET /hello.htm AFSP/1.0\r" + /*no CR*/
 //                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
 //                "Host: www.tutorialspoint.com\r\n" +
@@ -136,6 +149,6 @@
 //                "Accept-Encoding: gzip, deflate\r\n" +
 //                "Connection: Keep-Alive";
 //        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return inputStream;
+//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
 //    }
 //}
