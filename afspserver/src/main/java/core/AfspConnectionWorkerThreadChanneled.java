@@ -5,6 +5,7 @@ import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import process.DeleteProcessor;
 import process.GetProcessor;
 import process.ListProcessor;
 import process.RequestProcessor;
@@ -44,7 +45,8 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
                 processor = new GetProcessor(request, response, channel);
             }
             if(request.getMethod()==AfspMethod.DELETE){
-
+                LOGGER.info(" ** PROCESSING DELETE **");
+                processor = new DeleteProcessor(request,response,channel);
             }
             if (processor == null){
                 throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);

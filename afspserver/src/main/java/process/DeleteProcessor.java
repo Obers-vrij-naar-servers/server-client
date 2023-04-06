@@ -7,6 +7,9 @@ import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
 import util.AfspBackupFileHandler;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
 
 public class DeleteProcessor extends RequestProcessor{
@@ -19,6 +22,17 @@ public class DeleteProcessor extends RequestProcessor{
     @Override
     public void process() throws AfspProcessingException {
         AfspBackupFileHandler fileHandler = new AfspBackupFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-        fileHandler.deleteFile(request.getTarget());
+        OutputStream out = Channels.newOutputStream(channel);
+        try {
+            fileHandler.deleteFile(request.getTarget());
+            response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
+        } catch (AfspProcessingException e){
+            response = new AfspResponse(AfspStatusCode.CLIENT_ERROR_404_NOT_FOUND);
+        }
+        try {
+            out.write(response.toString().getBytes());
+        } catch (IOException e) {
+            throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+        }
     }
 }
