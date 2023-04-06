@@ -69,6 +69,7 @@ public class Prompt {
 
         if (promptResponse.getAction() == Action.Download_FILE) {
             downloadFollowUp(scannerInput);
+
         }
 
         if (promptResponse.getAction() == Action.DELETE_FILE_FROM_SERVER) {

@@ -23,5 +23,10 @@ public class DeleteProcessor extends BaseProcessor {
             throw new Exception("Socket channel is null");
         }
 
+        if (response.getStatusCode() != 200) {
+            System.out.println("Error occurred while deleting file");
+        } else {
+            System.out.println("\u001B[32m\033[1mSUCCESS!! the file is deleted" + request.getTarget() + "\u001B[0m");
+        }
     }
 }
