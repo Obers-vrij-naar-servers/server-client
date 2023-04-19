@@ -80,17 +80,15 @@ public class AfspFileHandler {
 
     public void sendFile( String fileName, int bufferSize, SocketChannel socketChannel) throws IOException {
         Path filePath = Paths.get(localFileDir+ "/" + fileName);
-        System.out.print("\033[3m\u001B[37mSending file to " + socketChannel.socket().getInetAddress().toString().substring(1) + ": \u001B[0m" + fileName + "...");
+        System.out.print("\033[3m\u001B[37mSending file to " + socketChannel.socket().getInetAddress().toString() + ": \u001B[0m" + fileName + "...");
 
         FileChannel fileChannel = FileChannel.open(filePath);
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
         while (fileChannel.read(buffer) > 0) {
-
             buffer.flip();
             socketChannel.write(buffer);
             buffer.clear();
-
         }
         System.out.print("\u001B[32m\033[1m SUCCESS!!\u001B[0m\n");
     }

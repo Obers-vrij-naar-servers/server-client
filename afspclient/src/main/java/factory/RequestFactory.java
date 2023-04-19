@@ -37,20 +37,27 @@ public class RequestFactory {
 
                 if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
                     List<FileInfo> targets = AfspFileHandler.getTargetFiles();
-
                     request.setRequestTarget(targets.get(AfspFileHandler.getFileChoice()).getFileName());
                 } else {
                     throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
             }
-//            case UPLOAD_FILES_TO_SERVER ->  {
-//                setMethod(request, "POST");
-//                headerList.add((new AfspHeader(AfspHeader.HeaderType.CHARSET)).setHeaderContent("UTF-8"));
-//                headerList.add((new AfspHeader(AfspHeader.HeaderType.BUFFER_SIZE)).setHeaderContent("8192"));
-//                headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
-//                // TODO content-length
-//
-//            }
+            case UPLOAD_FILES_TO_SERVER ->  {
+                setMethod(request, "POST");
+                request.setRequestTarget("post.txt");
+                headerList.add((new AfspHeader(AfspHeader.HeaderType.CHARSET)).setHeaderContent("UTF-8"));
+                headerList.add((new AfspHeader(AfspHeader.HeaderType.BUFFER_SIZE)).setHeaderContent("8192"));
+                headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
+                var headers = fileHandler.getFileInfo("post.txt");
+                for (AfspHeader h : headers) {
+                    if(h.getHeaderType() == AfspHeader.HeaderType.FILE_SIZE){
+                        headerList.add(new AfspHeader(AfspHeader.HeaderType.CONTENT_LENGTH).setHeaderContent(h.getHeaderContent()));
+                    } else {
+                        headerList.add(h);
+                    }
+                }
+
+            }
             case DELETE_FILE_FROM_SERVER -> {
                 setMethod(request, "DELETE");
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));

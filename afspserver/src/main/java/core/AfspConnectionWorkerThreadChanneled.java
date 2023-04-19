@@ -5,10 +5,7 @@ import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import process.DeleteProcessor;
-import process.GetProcessor;
-import process.ListProcessor;
-import process.RequestProcessor;
+import process.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,6 +40,10 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
             if (request.getMethod() == AfspMethod.GET) {
                 LOGGER.info(" ** PROCESSING GET **");
                 processor = new GetProcessor(request, response, channel);
+            }
+            if (request.getMethod() == AfspMethod.POST) {
+                LOGGER.info(" ** PROCESSING POST **");
+                processor = new PostProcessor(request, response, channel);
             }
             if(request.getMethod()==AfspMethod.DELETE){
                 LOGGER.info(" ** PROCESSING DELETE **");
