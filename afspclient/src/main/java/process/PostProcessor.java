@@ -13,15 +13,16 @@ import java.nio.channels.SocketChannel;
 
 public class PostProcessor extends  BaseProcessor {
 
-    private SocketChannel socket;
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
     public PostProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
-        super(request, response);
-        this.socket = socket;
+        super(socket, request, response);
+
     }
 
     @Override
     public void process() throws AfspProcessingException {
+        LOGGER.debug("PROCESSING POST");
+
         //request should contain all required headers
         if(!request.containsHeaders(AfspHeader.HeaderType.CHARSET, AfspHeader.HeaderType.BUFFER_SIZE, AfspHeader.HeaderType.CONTENT_LENGTH, AfspHeader.HeaderType.TIME_OUT)){
             throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
@@ -39,9 +40,7 @@ public class PostProcessor extends  BaseProcessor {
         var out = Channels.newOutputStream(socket);
         //send request and file
         try{
-            System.out.println(request.toString());
-            out.write(request.toString().getBytes());
-
+            LOGGER.debug("Sending file");
             fileHandler.sendFile(request.getTarget(),bufferSize,socket);
         } catch (IOException e) {
             throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);

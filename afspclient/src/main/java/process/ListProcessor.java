@@ -3,6 +3,7 @@ package process;
 import afsp.AfspHeader;
 import afsp.AfspRequest;
 import afsp.AfspResponse;
+import afsp.AfspResponseParser;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
@@ -21,13 +22,15 @@ public class ListProcessor extends BaseProcessor {
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     public ListProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
-        super(request, response);
+        super(socket,request, response);
     }
 
     @Override
     public void process() throws Exception {
 
         try {
+            AfspResponseParser parser = new AfspResponseParser();
+            response = parser.parseResponse(this.socket);
             String responseContent = response.getBody();
             // Strip \n from response
             responseContent = responseContent.substring(0, responseContent.length() - 1);

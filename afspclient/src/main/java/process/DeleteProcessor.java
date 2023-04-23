@@ -9,17 +9,15 @@ import util.AfspFileHandler;
 import java.nio.channels.SocketChannel;
 
 public class DeleteProcessor extends BaseProcessor {
-    private final SocketChannel socketChannel;
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
-    public DeleteProcessor(SocketChannel socketChannel, AfspRequest request, AfspResponse response) {
-        super(request, response);
-        this.socketChannel = socketChannel;
+    public DeleteProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
+        super(socket, request, response);
     }
 
     @Override
     public void process() throws Exception {
-        if (socketChannel == null) {
+        if (socket == null) {
             throw new Exception("Socket channel is null");
         }
 

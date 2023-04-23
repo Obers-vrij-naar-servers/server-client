@@ -18,16 +18,14 @@ import java.util.logging.FileHandler;
 public class GetProcessor extends BaseProcessor {
 
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
-    private final SocketChannel socketChannel;
 
     public GetProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
-        super(request, response);
-        this.socketChannel = socket;
+        super(socket,request, response);
     }
 
     public void process() throws Exception {
 
-        if (socketChannel == null) {
+        if (socket == null) {
             throw new Exception("Socket channel is null");
         }
         if(response.getStatusCode() != AfspStatusCode.SERVER_SUCCESS_200_OK.STATUS_CODE){
@@ -83,7 +81,7 @@ public class GetProcessor extends BaseProcessor {
         }
 
         System.out.println("\u001B[36m" + "Downloading file:" + "\u001B[0m");
-        fileHandler.receiveFile(socketChannel, fileSize, 8192, request.getTarget(), identifier);
+        fileHandler.receiveFile(socket, fileSize, 8192, request.getTarget(), identifier);
     }
 
 
