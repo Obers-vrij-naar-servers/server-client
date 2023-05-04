@@ -67,6 +67,10 @@ public class Prompt {
             promptResponse.setAction(actions[selectedAction - 1]);
         }
 
+        if (promptResponse.getAction() == Action.UPLOAD_FILES_TO_SERVER) {
+            uploadFollowUp(scannerInput);
+        }
+
         if (promptResponse.getAction() == Action.Download_FILE) {
             downloadFollowUp(scannerInput);
         }
@@ -87,6 +91,12 @@ public class Prompt {
 
     private void downloadFollowUp(Scanner scanner) {
         System.out.println("\u001B[34m" + "Select a file to download by number: " + "\u001B[0m");
+        System.out.println();
+        followUp(scanner);
+    }
+
+    private void uploadFollowUp(Scanner scanner) {
+        System.out.println("\u001B[34m" + "Select a file to upload by number: " + "\u001B[0m");
         System.out.println();
         followUp(scanner);
     }

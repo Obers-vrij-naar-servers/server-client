@@ -34,21 +34,15 @@ public class RequestFactory {
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.CHARSET)).setHeaderContent("UTF-8"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.BUFFER_SIZE)).setHeaderContent("8192"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
-
-                if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
-                    List<FileInfo> targets = AfspFileHandler.getTargetFiles();
-                    request.setRequestTarget(targets.get(AfspFileHandler.getFileChoice()).getFileName());
-                } else {
-                    throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
-                }
+                request.setRequestTarget(getTargetFileName());
             }
             case UPLOAD_FILES_TO_SERVER ->  {
                 setMethod(request, "POST");
-                request.setRequestTarget("post.txt");
+                request.setRequestTarget(getTargetFileName());
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.CHARSET)).setHeaderContent("UTF-8"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.BUFFER_SIZE)).setHeaderContent("8192"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
-                var headers = fileHandler.getFileInfo("post.txt");
+                var headers = fileHandler.getFileInfo(getTargetFileName());
                 for (AfspHeader h : headers) {
                     if(h.getHeaderType() == AfspHeader.HeaderType.FILE_SIZE){
                         headerList.add(new AfspHeader(AfspHeader.HeaderType.CONTENT_LENGTH).setHeaderContent(h.getHeaderContent()));
@@ -88,5 +82,21 @@ public class RequestFactory {
         } catch (AfspParsingException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getTargetFileName() {
+        List<FileInfo> targets = null;
+
+        try {
+            if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
+                targets = AfspFileHandler.getTargetFiles();
+            } else {
+                throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+            }
+        } catch (AfspProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return targets.get(AfspFileHandler.getFileChoice()).getFileName();
     }
 }
