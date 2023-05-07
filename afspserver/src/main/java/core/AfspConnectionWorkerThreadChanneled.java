@@ -35,7 +35,6 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
             if (request.getMethod() == AfspMethod.LIST) {
                 LOGGER.info(" ** PROCESSING LIST **");
                 processor = new ListProcessor(request, response, channel);
-                processor.process();
             }
             if (request.getMethod() == AfspMethod.GET) {
                 LOGGER.info(" ** PROCESSING GET **");

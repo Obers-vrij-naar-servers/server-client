@@ -106,7 +106,6 @@ public class Prompt {
     private void uploadFollowUp(Scanner scanner) throws AfspProcessingException {
         System.out.println("\u001B[34m" + "Select a file to upload by number: " + "\u001B[0m");
         System.out.println();
-        followUp(scanner);
 
         for (int i = 0; i < fileHandler.getFileList().size(); i++) {
             System.out.println((i + 1) + ". " + fileHandler.getFileList().get(i));
