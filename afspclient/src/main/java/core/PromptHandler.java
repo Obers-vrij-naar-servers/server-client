@@ -69,7 +69,6 @@ public class PromptHandler {
                 e.printStackTrace();
             } catch (Exception e) {
                 System.out.println("\n An error occurred: \n"+e.getMessage());
-                LOGGER.debug(response.toString());
             } finally {
                 Helper.closeChanelConnections(socketChannel);
             }
