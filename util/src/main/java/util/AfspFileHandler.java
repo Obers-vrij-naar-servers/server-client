@@ -10,10 +10,11 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +52,6 @@ public class AfspFileHandler {
         updateFileList();
         boolean fileExists = false;
 
-        LOGGER.info("** FILE-LIST: "+fileName+" **");
         for(String _fName : fileList){
             if( _fName.equals(fileName)){
                 fileExists = true;
@@ -69,8 +69,6 @@ public class AfspFileHandler {
         } catch (IOException e){
             throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
-        LOGGER.info("** FILE-SIZE: "+fileSize+" **");
-        LOGGER.info("** IDENTIFIER:"+" **");
         AfspHeader fileSizeHeader = new AfspHeader(AfspHeader.HeaderType.FILE_SIZE).setHeaderContent(String.valueOf(fileSize));
         AfspHeader identifierHeader = new AfspHeader(AfspHeader.HeaderType.IDENTIFIER).setHeaderContent(String.valueOf(identifier));
         headers.add(fileSizeHeader);
@@ -96,10 +94,17 @@ public class AfspFileHandler {
     public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName, String identifier) throws IOException, AfspParsingException {
 
         Path filePath = Paths.get(localFileDir+ "/" + fileName);
+        Path backupFilePath = Paths.get(localFileDir+ "/" + fileName + ".bak");
 
         // Mocht de Files-folder zijn verwijderd, maakt hij eerst een nieuwe aan.
         if(!Files.exists(Paths.get(localFileDir))) {
+            LOGGER.info("Creating backup for " + fileName);
             Files.createDirectories(Paths.get(localFileDir));
+        }
+
+        // Create backup file if the file already exists on server
+        if (Files.exists(filePath)) {
+            Files.move(filePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
         }
 
         System.out.print("\033[3m\u001B[37mDownloading file: \u001B[0m" + fileName + "...");
@@ -135,12 +140,20 @@ public class AfspFileHandler {
             }
         }
 
+        //check if the filesize of the newly created file matches the header, and if not restore the backup
         long fileSizeClient = Files.size(filePath);
-
         if (fileSize != fileSizeClient) {
-            fileChannel.close();
-            Files.delete(filePath);
+            LOGGER.info("Restoring backup for file " + fileName);
+            if (Files.exists(backupFilePath)) {
+                Files.move(backupFilePath, filePath, StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                Files.delete(filePath);
+            }
             throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+        }
+        //else if it matched, delete the created backup file
+        else {
+            Files.delete(backupFilePath);
         }
 
         fileChannel.close();

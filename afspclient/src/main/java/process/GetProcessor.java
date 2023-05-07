@@ -1,9 +1,6 @@
 package process;
 
-import afsp.AfspHeader;
-import afsp.AfspRequest;
-import afsp.AfspResponse;
-import afsp.AfspStatusCode;
+import afsp.*;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
@@ -28,6 +25,8 @@ public class GetProcessor extends BaseProcessor {
         if (socket == null) {
             throw new Exception("Socket channel is null");
         }
+        AfspResponseParser parser = new AfspResponseParser();
+        response = parser.parseResponse(this.socket);
         if(response.getStatusCode() != AfspStatusCode.SERVER_SUCCESS_200_OK.STATUS_CODE){
             throw new Exception(response.toString());
         }

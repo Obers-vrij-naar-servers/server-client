@@ -2,6 +2,7 @@ package process;
 
 import afsp.AfspRequest;
 import afsp.AfspResponse;
+import afsp.AfspResponseParser;
 import afsp.exception.AfspProcessingException;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
@@ -20,7 +21,8 @@ public class DeleteProcessor extends BaseProcessor {
         if (socket == null) {
             throw new Exception("Socket channel is null");
         }
-
+        AfspResponseParser parser = new AfspResponseParser();
+        response = parser.parseResponse(this.socket);
         if (response.getStatusCode() != 200) {
             System.out.println("Error occurred while deleting file, you might need to run 1. Show all files first");
         } else {
