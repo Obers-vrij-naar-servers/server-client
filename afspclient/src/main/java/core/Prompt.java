@@ -1,8 +1,11 @@
 package core;
 
+import afsp.AfspStatusCode;
+import afsp.exception.AfspProcessingException;
 import config.Configuration;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
+
 import java.util.Scanner;
 
 public class Prompt {
@@ -12,6 +15,7 @@ public class Prompt {
     private final PromptHandler promptHandler;
     private boolean firstPrompt = true;
     private boolean ready = false;
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     public Prompt(Configuration conf) {
         this.promptHandler = new PromptHandler(conf);
@@ -67,6 +71,14 @@ public class Prompt {
             promptResponse.setAction(actions[selectedAction - 1]);
         }
 
+        if (promptResponse.getAction() == Action.UPLOAD_FILES_TO_SERVER) {
+            try {
+                uploadFollowUp(scannerInput);
+            } catch (AfspProcessingException e) {
+                System.out.println("\u001B[31m" + "Error: " + e.getMessage() + "\u001B[0m");
+            }
+        }
+
         if (promptResponse.getAction() == Action.Download_FILE) {
             downloadFollowUp(scannerInput);
         }
@@ -91,7 +103,22 @@ public class Prompt {
         followUp(scanner);
     }
 
-    private void followUp(Scanner scanner){
+    private void uploadFollowUp(Scanner scanner) throws AfspProcessingException {
+        System.out.println("\u001B[34m" + "Select a file to upload by number: " + "\u001B[0m");
+        System.out.println();
+        followUp(scanner);
+
+        for (int i = 0; i < fileHandler.getFileList().size(); i++) {
+            System.out.println((i + 1) + ". " + fileHandler.getFileList().get(i));
+        }
+        scanner.nextLine();
+
+        if (scanner.hasNextInt()) {
+            AfspFileHandler.setFileChoice(scanner.nextInt() - 1);
+        }
+    }
+
+    private void followUp(Scanner scanner) {
         for (int i = 0; i < AfspFileHandler.getTargetFiles().size(); i++) {
             System.out.println((i + 1) + ". " + AfspFileHandler.getTargetFiles().get(i).getFileName());
         }

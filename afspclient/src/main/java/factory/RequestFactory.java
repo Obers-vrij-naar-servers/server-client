@@ -35,20 +35,39 @@ public class RequestFactory {
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.BUFFER_SIZE)).setHeaderContent("8192"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
 
-                if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
-                    List<FileInfo> targets = AfspFileHandler.getTargetFiles();
-                    request.setRequestTarget(targets.get(AfspFileHandler.getFileChoice()).getFileName());
-                } else {
-                    throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                try {
+                    if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
+                        request.setRequestTarget(AfspFileHandler.getTargetFiles().get(AfspFileHandler.getFileChoice()).getFileName());
+
+                    } else {
+                        throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                    }
+                } catch (AfspProcessingException e) {
+                    e.printStackTrace();
                 }
+
             }
             case UPLOAD_FILES_TO_SERVER ->  {
                 setMethod(request, "POST");
-                request.setRequestTarget("post.txt");
+                List<String> targets = null;
+
+                try {
+                    if (fileHandler.getFileList() != null && fileHandler.getFileList().size() > 0) {
+                        targets = fileHandler.getFileList();
+                    } else {
+                        throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                    }
+                } catch (AfspProcessingException e) {
+                    e.printStackTrace();
+                }
+
+                var filename = targets.get(AfspFileHandler.getFileChoice());
+
+                request.setRequestTarget(filename);
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.CHARSET)).setHeaderContent("UTF-8"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.BUFFER_SIZE)).setHeaderContent("8192"));
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
-                var headers = fileHandler.getFileInfo("post.txt");
+                var headers = fileHandler.getFileInfo(filename);
                 for (AfspHeader h : headers) {
                     if(h.getHeaderType() == AfspHeader.HeaderType.FILE_SIZE){
                         headerList.add(new AfspHeader(AfspHeader.HeaderType.CONTENT_LENGTH).setHeaderContent(h.getHeaderContent()));
@@ -62,12 +81,15 @@ public class RequestFactory {
                 setMethod(request, "DELETE");
                 headerList.add((new AfspHeader(AfspHeader.HeaderType.TIME_OUT)).setHeaderContent("1000"));
 
-                if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
-                    List<FileInfo> targets = AfspFileHandler.getTargetFiles();
+                try {
+                    if (AfspFileHandler.getTargetFiles() != null && AfspFileHandler.getTargetFiles().size() > 0) {
+                        request.setRequestTarget(AfspFileHandler.getTargetFiles().get(AfspFileHandler.getFileChoice()).getFileName());
 
-                    request.setRequestTarget(targets.get(AfspFileHandler.getFileChoice()).getFileName());
-                } else {
-                    throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                    } else {
+                        throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                    }
+                } catch (AfspProcessingException e) {
+                    e.printStackTrace();
                 }
             }
 
