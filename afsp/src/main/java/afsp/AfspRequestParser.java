@@ -11,18 +11,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 
 public class AfspRequestParser {
 
     private final Logger LOGGER = LoggerFactory.getLogger(AfspRequestParser.class);
+    private InputStreamReader reader = null;
+    public AfspRequestParser() {
+    }
+
+    public AfspRequestParser(InputStreamReader reader) {
+        this.reader = reader;
+    }
 
 
     public AfspRequest parseAfspRequest(SocketChannel channel) throws AfspParsingException {
         LOGGER.info("** Start Parsing Request **");
 
-        InputStreamReader reader = new InputStreamReader(Channels.newInputStream(channel), StandardCharsets.UTF_8);
+        if(this.reader == null){
+            this.reader = new InputStreamReader(Channels.newInputStream(channel), StandardCharsets.UTF_8);
+        }
+
 
         // get request from input stream
 
