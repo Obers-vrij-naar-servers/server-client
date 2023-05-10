@@ -16,10 +16,21 @@ import java.nio.charset.StandardCharsets;
 public class AfspResponseParser {
     private final Logger LOGGER = LoggerFactory.getLogger(AfspResponseParser.class);
 
+    private InputStreamReader reader = null;
+
+    public AfspResponseParser(){
+    }
+
+    //Constructor with reader for testing-purposes
+    public AfspResponseParser(InputStreamReader reader) {
+        this.reader = reader;
+    }
 
     public AfspResponse parseResponse(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException {
         LOGGER.info("** Start Parsing Response **");
-        InputStreamReader reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
+        if (reader == null){
+            reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
+        }
         AfspResponse response = new AfspResponse();
             try {
                 parseStatusLine(reader,response);
@@ -57,8 +68,13 @@ public class AfspResponseParser {
                 }
                 _byte = reader.read();
                 if (_byte == ByteCode.LF.code) {
-                    LOGGER.info("** MESSAGE PARSED: "+responseBuffer.toString()+"**");
+                    LOGGER.info("** MESSAGE PARSED: "+responseBuffer+"**");
                     return;
+                }
+            } else {
+                if (_byte == ByteCode.LF.code) {
+                    LOGGER.warn(" ** NO _CR AFTER _LF_ ** ");
+                    throw new AfspResponseException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
             }
             if (_byte == ByteCode.SP.code){

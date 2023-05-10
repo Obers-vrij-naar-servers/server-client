@@ -28,24 +28,6 @@ public abstract class AfspMessage {
         return this;
     }
 
-    //    public boolean containsHeaders(AfspHeader.HeaderType... headerTypes){
-//        List<Boolean> conformationList = new ArrayList<>();
-//        if (this.headerList == null || this.headerList.isEmpty()) {
-//            LOGGER.debug(" ** HEADERLIST NULL / EMPTY **");
-//            return false;
-//        }
-//        for (AfspHeader.HeaderType headerType : headerTypes){
-//
-//            for (AfspHeader header: this.headerList){
-//                if (header.getHeaderType().equals(headerType)) {
-//                    conformationList.add(true);
-//                    break;
-//                }
-//            }
-//            conformationList.add(true);
-//        }
-//        return !conformationList.contains(false);
-//    }
     public boolean containsHeaders(AfspHeader.HeaderType... headerTypes) {
         if (this.headerList == null || this.headerList.isEmpty()) {
             LOGGER.debug(" ** HEADERLIST NULL / EMPTY **");

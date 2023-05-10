@@ -22,10 +22,10 @@ public class AfspRequestParser {
     public AfspRequestParser() {
     }
 
+    //Constructor with reader for testing-purposes
     public AfspRequestParser(InputStreamReader reader) {
         this.reader = reader;
     }
-
 
     public AfspRequest parseAfspRequest(SocketChannel channel) throws AfspParsingException {
         LOGGER.info("** Start Parsing Request **");
@@ -88,6 +88,11 @@ public class AfspRequestParser {
                     LOGGER.warn(" ** NO _LF_ AFTER _CR_ ** ");
                     throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
+            } else {
+                if (_byte == ByteCode.LF.code) {
+                    LOGGER.warn(" ** NO _CR AFTER _LF_ ** ");
+                    throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                }
             }
             if (_byte == ByteCode.SP.code) {
                 if (!methodParsed) {
@@ -95,8 +100,19 @@ public class AfspRequestParser {
                     methodParsed = true;
                 } else if (!targetParsed) {
                     String encodedTarget = requestBuffer.toString();
+                    //throw error if target starts with a space
+                    if(encodedTarget.startsWith(" ")){
+                        throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                    };
+                    //throw error if target has length 1 and is not /, \ or
+                    if (encodedTarget.length() == 1){
+                        if (!encodedTarget.startsWith("/") || !encodedTarget.startsWith("\\")){
+                            throw new AfspParsingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
+                        }
+                    }
                     String decodedTarget = Utils.decodeString(encodedTarget);
                     request.setRequestTarget(decodedTarget);
+                    LOGGER.warn(" ** targetParsed ** ");
                     targetParsed = true;
                 } else {
                     LOGGER.warn(" ** _SP_ AFTER METHOD AND TARGET PARSED ** ");
