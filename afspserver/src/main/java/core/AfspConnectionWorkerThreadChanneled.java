@@ -26,7 +26,7 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
 
         AfspRequestParser parser = new AfspRequestParser();
         AfspRequest request;
-        AfspResponse response;
+        AfspResponse response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
         RequestProcessor processor = null;
         try {
             request = parser.parseAfspRequest(channel);
@@ -55,13 +55,14 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
 
 
         } catch (AfspParsingException | AfspProcessingException e) {
+                response = new AfspResponse(e.getErrorCode());
+        } finally {
             OutputStream out = Channels.newOutputStream(channel);
             try {
-                out.write(new AfspResponse(e.getErrorCode()).toString().getBytes());
-            } catch (IOException ex) {
-                e.printStackTrace();
+                out.write(response.toString().getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-
         }
 
     }

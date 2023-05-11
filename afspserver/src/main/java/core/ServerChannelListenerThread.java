@@ -9,7 +9,6 @@ import java.nio.channels.ServerSocketChannel;
 
 public class ServerChannelListenerThread  extends Thread{
 
-
     private final static Logger LOGGER = LoggerFactory.getLogger(ServerChannelListenerThread.class);
 
     private int port;

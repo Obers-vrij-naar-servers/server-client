@@ -36,8 +36,11 @@ public class PostProcessor extends  BaseProcessor {
             throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
         }
 
-        //create outputChannel
-        var out = Channels.newOutputStream(socket);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            LOGGER.info("Could not sleep");
+        }
         //send request and file
         try{
             LOGGER.debug("Sending file");

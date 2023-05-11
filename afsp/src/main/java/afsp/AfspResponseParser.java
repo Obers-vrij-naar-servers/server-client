@@ -1,6 +1,7 @@
 package afsp;
 
 import afsp.exception.AfspParsingException;
+import afsp.exception.AfspProcessingException;
 import afsp.exception.AfspResponseException;
 import afsp.util.ByteCode;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class AfspResponseParser {
         this.reader = reader;
     }
 
-    public AfspResponse parseResponse(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException {
+    public AfspResponse parseResponse(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException, AfspProcessingException {
         LOGGER.info("** Start Parsing Response **");
         if (reader == null){
             reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
@@ -123,7 +124,14 @@ public class AfspResponseParser {
 
         }
     }
-    private void parseBody(InputStreamReader reader, AfspResponse response) throws IOException {
+    private void parseBody(InputStreamReader reader, AfspResponse response) throws IOException, AfspProcessingException {
+        long contentLength;
+        try {
+            contentLength = Long.parseLong(response.getHeader(AfspHeader.HeaderType.CONTENT_LENGTH).getHeaderContent());
+        } catch (AfspProcessingException e){
+            LOGGER.info("** NO CONTENT-LENGTH HEADER, NOT PARSING BODY **");
+            return;
+        }
         LOGGER.info(" ** PARSING BODY **");
         StringBuilder bodyBuffer = new StringBuilder();
         while (true) {
@@ -132,6 +140,9 @@ public class AfspResponseParser {
             }
             int _byte = reader.read();
             if (_byte < 0) {
+                break;
+            }
+            if(bodyBuffer.length() >= contentLength){
                 break;
             }
             bodyBuffer.append((char) _byte);
@@ -143,6 +154,5 @@ public class AfspResponseParser {
         }
         String body = bodyBuffer.toString();
         response.setBody(body);
-        LOGGER.info(response.toString());
     }
 }
