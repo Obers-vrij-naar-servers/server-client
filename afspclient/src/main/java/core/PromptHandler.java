@@ -36,16 +36,14 @@ public class PromptHandler {
             socketChannel.connect(address);
 
             ByteBuffer buffer = ByteBuffer.allocate(1024);
-            AfspResponseParser parser = new AfspResponseParser();
             AfspRequest request = requestFactory.createRequest(promptResponse);
-            LOGGER.info("Request: " + request.toString());
 
             buffer.put(request.toString().getBytes());
             buffer.flip();
             socketChannel.write(buffer);
             buffer.clear();
 
-            AfspResponse response = parser.parseResponse(socketChannel);
+            AfspResponse response = new AfspResponse();
 
             if (request.getMethod() == AfspMethod.LIST) {
                 processor = new ListProcessor(socketChannel, request, response);
@@ -68,7 +66,7 @@ public class PromptHandler {
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                System.out.println("\n An error occurred: \n"+e.getMessage());
             } finally {
                 Helper.closeChanelConnections(socketChannel);
             }
@@ -78,10 +76,6 @@ public class PromptHandler {
             e.printStackTrace();
         } catch (AfspParsingException e) {
             LOGGER.error("Error while parsing response");
-
-            e.printStackTrace();
-        } catch (AfspResponseException e) {
-            LOGGER.error("Error while processing response");
 
             e.printStackTrace();
         } catch (AfspProcessingException e) {

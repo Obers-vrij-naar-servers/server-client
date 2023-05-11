@@ -1,8 +1,11 @@
 package core;
 
+import afsp.AfspStatusCode;
+import afsp.exception.AfspProcessingException;
 import config.Configuration;
 import config.ConfigurationManager;
 import util.AfspFileHandler;
+
 import java.util.Scanner;
 
 public class Prompt {
@@ -12,6 +15,7 @@ public class Prompt {
     private final PromptHandler promptHandler;
     private boolean firstPrompt = true;
     private boolean ready = false;
+    private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
 
     public Prompt(Configuration conf) {
         this.promptHandler = new PromptHandler(conf);
@@ -35,6 +39,7 @@ public class Prompt {
         int selectedAction = 0;
 
         if (firstPrompt) {
+            System.out.println("\u001B[33m" + "Getting filelist from server " + "\u001B[0m");
             promptResponse.setAction(actions[0]);
         } else {
             System.out.println();
@@ -67,9 +72,16 @@ public class Prompt {
             promptResponse.setAction(actions[selectedAction - 1]);
         }
 
+        if (promptResponse.getAction() == Action.UPLOAD_FILES_TO_SERVER) {
+            try {
+                uploadFollowUp(scannerInput);
+            } catch (AfspProcessingException e) {
+                System.out.println("\u001B[31m" + "Error: " + e.getMessage() + "\u001B[0m");
+            }
+        }
+
         if (promptResponse.getAction() == Action.Download_FILE) {
             downloadFollowUp(scannerInput);
-
         }
 
         if (promptResponse.getAction() == Action.DELETE_FILE_FROM_SERVER) {
@@ -81,9 +93,23 @@ public class Prompt {
 
     private void deleteFollowUp(Scanner scanner) {
         System.out.println("\u001B[34m" + "Select a file to delete by number: " + "\u001B[0m");
+        System.out.println("\n");
+        followUp(scanner);
+    }
+
+
+    private void downloadFollowUp(Scanner scanner) {
+        System.out.println("\u001B[34m" + "Select a file to download by number: " + "\u001B[0m");
         System.out.println();
-        for (int i = 0; i < AfspFileHandler.getTargetFiles().size(); i++) {
-            System.out.println((i + 1) + ". " + AfspFileHandler.getTargetFiles().get(i).getFileName());
+        followUp(scanner);
+    }
+
+    private void uploadFollowUp(Scanner scanner) throws AfspProcessingException {
+        System.out.println("\u001B[34m" + "Select a file to upload by number: " + "\u001B[0m");
+        System.out.println();
+
+        for (int i = 0; i < fileHandler.getFileList().size(); i++) {
+            System.out.println((i + 1) + ". " + fileHandler.getFileList().get(i));
         }
         scanner.nextLine();
 
@@ -92,10 +118,7 @@ public class Prompt {
         }
     }
 
-
-    private void downloadFollowUp(Scanner scanner) {
-        System.out.println("\u001B[34m" + "Select a file to download by number: " + "\u001B[0m");
-        System.out.println();
+    private void followUp(Scanner scanner) {
         for (int i = 0; i < AfspFileHandler.getTargetFiles().size(); i++) {
             System.out.println((i + 1) + ". " + AfspFileHandler.getTargetFiles().get(i).getFileName());
         }

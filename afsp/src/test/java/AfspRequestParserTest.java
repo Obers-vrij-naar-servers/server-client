@@ -1,154 +1,151 @@
-//import afsp.*;
-//import afsp.exception.AfspParsingException;
-//import org.junit.jupiter.api.BeforeAll;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.TestInstance;
-//
-//import java.io.ByteArrayInputStream;
-//import java.io.IOException;
-//import java.io.InputStream;
-//import java.net.Socket;
-//import java.nio.channels.SocketChannel;
-//import java.nio.charset.StandardCharsets;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.fail;
-//
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-//class AfspRequestParserTest {
-//
-//    private AfspRequestParser afspParser;
-//
-//    @BeforeAll
-//    public void beforeClass() {
-//
-//        afspParser = new AfspRequestParser();
-//    }
-//
-//    @Test
-//    void parse_GET_AfspRequest() throws AfspParsingException {
-//        try{
-//            AfspRequest request = afspParser.parseAfspRequest(generateValidGETTestCase());
-//            assertEquals(request.getMethod(), AfspMethod.GET);
-//        } catch (AfspParsingException | IOException e){
-//            fail(e);
-//        }
-//    }
-//    @Test
-//    void parse_GeT_AfspRequest() throws AfspParsingException {
-//        try{
-//            AfspRequest request = afspParser.parseAfspRequest(generateInvalidGETTestCase());
-//            fail();
-//        } catch (AfspParsingException e){
-//            assertEquals(e.getErrorCode(), AfspStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED);
-//        } catch (IOException e) {
-//            fail();
-//        }
-//    }
-//    @Test
-//    void parse_TooLongRequestName_Request() throws AfspParsingException {
-//        try{
-//            AfspRequest request = afspParser.parseAfspRequest(generateInvalidRequestTypeTestCase());
-//            fail();
-//        } catch (AfspParsingException e){
-//            assertEquals(e.getErrorCode(), AfspStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED);
-//        } catch (IOException e) {
-//            fail();
-//        }
-//
-//    }
-//    @Test
-//    void parse_InvalidItemsRequestLine_Request() throws AfspParsingException {
-//        try{
-//            AfspRequest request = afspParser.parseAfspRequest(generateInvalidRequestItemsTestCase());
-//            fail();
-//        } catch (AfspParsingException e){
-//            assertEquals(e.getErrorCode(), AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
-//        } catch (IOException e) {
-//            fail(e);
-//        }
-//
-//    }
-//    @Test
-//    void parse_EmptyRequestLine_Request() throws AfspParsingException {
-//        try{
-//            AfspRequest request = afspParser.parseAfspRequest(generateEmptyRequestLineTestCase());
-//            fail();
-//        } catch (AfspParsingException e){
-//            assertEquals(e.getErrorCode(), AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
-//        } catch (IOException e) {
-//            fail(e);
-//        }
-//
-//    }
-//    @Test
-//    void parse_OnlyCR_NoLF_RequestLine_Request() throws AfspParsingException {
-//        try{
-//            AfspRequest request = afspParser.parseAfspRequest(generateOnlyCRnoLFTestCase());
-//            fail();
-//        } catch (AfspParsingException e){
-//            assertEquals(e.getErrorCode(), AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
-//        } catch (IOException e) {
-//            fail();
-//        }
-//
-//    }
-//
-//
-//    private SocketChannel generateValidGETTestCase() throws IOException {
-//        String rawDataString = "GET /hello.htm AFSP/1.0\r\n" +
-//                "Content-length: 8192\r\n";
-//        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
-//    }
-//    private SocketChannel generateInvalidGETTestCase() throws IOException {
-//        String rawDataString = "GeT /hello.htm AFSP/1.0\r\n" +
-//                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
-//                "Host: www.tutorialspoint.com\r\n" +
-//                "Accept-Language: en-us\r\n" +
-//                "Accept-Encoding: gzip, deflate\r\n" +
-//                "Connection: Keep-Alive";
-//        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
-//    }
-//    private SocketChannel generateInvalidRequestTypeTestCase() throws IOException {
-//        String rawDataString = "GETTETTETT /hello.htm AFSP/1.0\r\n" +
-//                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
-//                "Host: www.tutorialspoint.com\r\n" +
-//                "Accept-Language: en-us\r\n" +
-//                "Accept-Encoding: gzip, deflate\r\n" +
-//                "Connection: Keep-Alive";
-//        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
-//    }
-//    private SocketChannel generateInvalidRequestItemsTestCase() throws IOException {
-//        String rawDataString = "GET /first /hello.htm AFSP/1.0\r\n" +
-//                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
-//                "Host: www.tutorialspoint.com\r\n" +
-//                "Accept-Language: en-us\r\n" +
-//                "Accept-Encoding: gzip, deflate\r\n" +
-//                "Connection: Keep-Alive";
-//        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
-//    }
-//    private SocketChannel generateEmptyRequestLineTestCase() throws IOException {
-//        String rawDataString = "\r\n" +
-//                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
-//                "Host: www.tutorialspoint.com\r\n" +
-//                "Accept-Language: en-us\r\n" +
-//                "Accept-Encoding: gzip, deflate\r\n" +
-//                "Connection: Keep-Alive";
-//        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
-//    }
-//    private SocketChannel generateOnlyCRnoLFTestCase() throws IOException {
-//        String rawDataString = "GET /hello.htm AFSP/1.0\r" + /*no CR*/
-//                "User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r\n" +
-//                "Host: www.tutorialspoint.com\r\n" +
-//                "Accept-Language: en-us\r\n" +
-//                "Accept-Encoding: gzip, deflate\r\n" +
-//                "Connection: Keep-Alive";
-//        InputStream inputStream = new ByteArrayInputStream(rawDataString.getBytes(StandardCharsets.UTF_8));
-//        return InputStreamToSocketChannel.wrap(inputStream, new Socket());
-//    }
-//}
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
+
+import afsp.AfspMethod;
+import afsp.AfspRequest;
+import afsp.AfspRequestParser;
+import afsp.AfspStatusCode;
+import afsp.exception.AfspParsingException;
+import afsp.exception.AfspProcessingException;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+
+class AfspRequestParserTest {
+
+    private InputStreamMocker mocker = new InputStreamMocker();
+
+
+    @Test
+    void testParseAfspRequest_validRequest() throws Exception {
+        //Arrange
+        InputStreamReader reader = getValidRequest_InputReader();
+        AfspRequestParser parser = new AfspRequestParser(reader);
+        //Act
+        AfspRequest request = parser.parseAfspRequest(mock(SocketChannel.class));
+
+        //Assert
+        assertEquals(AfspMethod.LIST, request.getMethod());
+        assertEquals("/", request.getRequestTarget());
+        assertEquals("AFSP/1.0", request.getProtocol());
+    }
+
+    @Test
+    void testParseAfspRequest_invalidMethod() throws Exception {
+        //Arrange
+        InputStreamReader reader = getInvalidMethod_InputReader();
+        AfspRequestParser parser = new AfspRequestParser(reader);
+        AfspParsingException error = null;
+        //Act
+        try {
+            parser.parseAfspRequest(mock(SocketChannel.class));
+        } catch (AfspParsingException e) {
+            error = e;
+        }
+        if (error == null) {
+            fail("No error thrown on BAD request");
+        }
+        assertEquals(AfspStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED, error.getErrorCode());
+    }
+
+    @Test
+    void testParseAfspRequest_invalidRequestTarget() throws Exception {
+        //Arrange
+        InputStreamReader reader = getInvalidRequestTarget_InputReader();
+        AfspRequestParser parser = new AfspRequestParser(reader);
+        AfspParsingException error = null;
+        //Act
+        try {
+            parser.parseAfspRequest(mock(SocketChannel.class));
+        } catch (AfspParsingException e) {
+            error = e;
+        }
+        if (error == null) {
+            fail("No error thrown on SP target");
+        }
+        assertEquals(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST, error.getErrorCode());
+    }
+
+    @Test
+    void testParseAfspRequest_invalidProtocolVersion() throws Exception {
+        //Arrange
+        InputStreamReader reader = getInvalidProtocolVersion_InputReader();
+        AfspRequestParser parser = new AfspRequestParser(reader);
+        AfspParsingException error = null;
+        //Act
+        try {
+            parser.parseAfspRequest(mock(SocketChannel.class));
+        } catch (AfspParsingException e) {
+            error = e;
+        }
+        if (error == null) {
+            fail("No error thrown on AFSP/2.0 protocol");
+        }
+        assertEquals(AfspStatusCode.SERVER_ERROR_505_PROTOCOL_NOT_SUPPORTED, error.getErrorCode());
+    }
+
+    @Test
+    void testParseAfspRequest_MissingCRorLF() throws Exception {
+        //Arrange
+        InputStreamReader reader =  getMissingCROrLF_InputReader();
+        AfspRequestParser parser = new AfspRequestParser(reader);
+        AfspParsingException error = null;
+        //Act
+        try {
+            parser.parseAfspRequest(mock(SocketChannel.class));
+        } catch (AfspParsingException e) {
+            error = e;
+        }
+        if (error == null) {
+            fail("No error thrown on missing CR protocol");
+        }
+        assertEquals(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST, error.getErrorCode());
+    }
+
+    //helper methods
+
+
+    private InputStreamReader getValidRequest_InputReader() throws IOException {
+        AfspRequest request;
+        try {
+            request = new AfspRequest().setMethod(AfspMethod.LIST).setRequestTarget("/");
+        } catch (AfspParsingException e) {
+            throw new IOException(e);
+        }
+        return mocker.getReader(request.toString());
+    }
+
+
+    private InputStreamReader getInvalidMethod_InputReader() {
+        var request = "BAD /path/to/resource AFSP/1.0\r\n" +
+                "\r\n" +
+                "Host: localhost\r\n";
+
+        return mocker.getReader(request);
+
+    }
+
+    private InputStreamReader getInvalidRequestTarget_InputReader() throws AfspParsingException {
+        var request = new AfspRequest();
+        request.setMethod(AfspMethod.GET);
+        request.setRequestTarget(" ");
+        return mocker.getReader(request.toString());
+    }
+
+    private InputStreamReader getInvalidProtocolVersion_InputReader() {
+        var request = "GET /path/to/resource AFSP/2.0\r\n";
+        return mocker.getReader(request);
+    }
+
+    private InputStreamReader getMissingCROrLF_InputReader()  {
+        var request = "GET /path/to/resource AFSP/1.0\n";
+        return mocker.getReader(request);
+    }
+
+}

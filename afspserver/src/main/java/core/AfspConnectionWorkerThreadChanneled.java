@@ -5,10 +5,7 @@ import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import process.DeleteProcessor;
-import process.GetProcessor;
-import process.ListProcessor;
-import process.RequestProcessor;
+import process.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,7 +26,7 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
 
         AfspRequestParser parser = new AfspRequestParser();
         AfspRequest request;
-        AfspResponse response;
+        AfspResponse response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
         RequestProcessor processor = null;
         try {
             request = parser.parseAfspRequest(channel);
@@ -38,11 +35,14 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
             if (request.getMethod() == AfspMethod.LIST) {
                 LOGGER.info(" ** PROCESSING LIST **");
                 processor = new ListProcessor(request, response, channel);
-                processor.process();
             }
             if (request.getMethod() == AfspMethod.GET) {
                 LOGGER.info(" ** PROCESSING GET **");
                 processor = new GetProcessor(request, response, channel);
+            }
+            if (request.getMethod() == AfspMethod.POST) {
+                LOGGER.info(" ** PROCESSING POST **");
+                processor = new PostProcessor(request, response, channel);
             }
             if(request.getMethod()==AfspMethod.DELETE){
                 LOGGER.info(" ** PROCESSING DELETE **");
@@ -55,13 +55,14 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
 
 
         } catch (AfspParsingException | AfspProcessingException e) {
+                response = new AfspResponse(e.getErrorCode());
+        } finally {
             OutputStream out = Channels.newOutputStream(channel);
             try {
-                out.write(new AfspResponse(e.getErrorCode()).toString().getBytes());
-            } catch (IOException ex) {
-                e.printStackTrace();
+                out.write(response.toString().getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-
         }
 
     }

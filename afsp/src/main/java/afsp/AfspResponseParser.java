@@ -1,6 +1,7 @@
 package afsp;
 
 import afsp.exception.AfspParsingException;
+import afsp.exception.AfspProcessingException;
 import afsp.exception.AfspResponseException;
 import afsp.util.ByteCode;
 import org.slf4j.Logger;
@@ -16,10 +17,21 @@ import java.nio.charset.StandardCharsets;
 public class AfspResponseParser {
     private final Logger LOGGER = LoggerFactory.getLogger(AfspResponseParser.class);
 
+    private InputStreamReader reader = null;
 
-    public AfspResponse parseResponse(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException {
+    public AfspResponseParser(){
+    }
+
+    //Constructor with reader for testing-purposes
+    public AfspResponseParser(InputStreamReader reader) {
+        this.reader = reader;
+    }
+
+    public AfspResponse parseResponse(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException, AfspProcessingException {
         LOGGER.info("** Start Parsing Response **");
-        InputStreamReader reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
+        if (reader == null){
+            reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
+        }
         AfspResponse response = new AfspResponse();
             try {
                 parseStatusLine(reader,response);
@@ -57,8 +69,13 @@ public class AfspResponseParser {
                 }
                 _byte = reader.read();
                 if (_byte == ByteCode.LF.code) {
-                    LOGGER.info("** MESSAGE PARSED: "+responseBuffer.toString()+"**");
+                    LOGGER.info("** MESSAGE PARSED: "+responseBuffer+"**");
                     return;
+                }
+            } else {
+                if (_byte == ByteCode.LF.code) {
+                    LOGGER.warn(" ** NO _CR AFTER _LF_ ** ");
+                    throw new AfspResponseException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
             }
             if (_byte == ByteCode.SP.code){
@@ -107,7 +124,14 @@ public class AfspResponseParser {
 
         }
     }
-    private void parseBody(InputStreamReader reader, AfspResponse response) throws IOException {
+    private void parseBody(InputStreamReader reader, AfspResponse response) throws IOException, AfspProcessingException {
+        long contentLength;
+        try {
+            contentLength = Long.parseLong(response.getHeader(AfspHeader.HeaderType.CONTENT_LENGTH).getHeaderContent());
+        } catch (AfspProcessingException e){
+            LOGGER.info("** NO CONTENT-LENGTH HEADER, NOT PARSING BODY **");
+            return;
+        }
         LOGGER.info(" ** PARSING BODY **");
         StringBuilder bodyBuffer = new StringBuilder();
         while (true) {
@@ -116,6 +140,9 @@ public class AfspResponseParser {
             }
             int _byte = reader.read();
             if (_byte < 0) {
+                break;
+            }
+            if(bodyBuffer.length() >= contentLength){
                 break;
             }
             bodyBuffer.append((char) _byte);
@@ -127,6 +154,5 @@ public class AfspResponseParser {
         }
         String body = bodyBuffer.toString();
         response.setBody(body);
-        LOGGER.info(response.toString());
     }
 }
