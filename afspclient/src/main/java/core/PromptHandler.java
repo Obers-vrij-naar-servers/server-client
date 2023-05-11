@@ -37,7 +37,6 @@ public class PromptHandler {
 
             ByteBuffer buffer = ByteBuffer.allocate(1024);
             AfspRequest request = requestFactory.createRequest(promptResponse);
-            LOGGER.info("Request: " + request.toString());
 
             buffer.put(request.toString().getBytes());
             buffer.flip();
@@ -45,7 +44,6 @@ public class PromptHandler {
             buffer.clear();
 
             AfspResponse response = new AfspResponse();
-            LOGGER.debug("REQUEST METHOD:"+request.getMethod());
 
             if (request.getMethod() == AfspMethod.LIST) {
                 processor = new ListProcessor(socketChannel, request, response);

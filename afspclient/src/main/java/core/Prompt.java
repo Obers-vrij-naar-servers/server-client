@@ -39,6 +39,7 @@ public class Prompt {
         int selectedAction = 0;
 
         if (firstPrompt) {
+            System.out.println("\u001B[33m" + "Getting filelist from server " + "\u001B[0m");
             promptResponse.setAction(actions[0]);
         } else {
             System.out.println();
