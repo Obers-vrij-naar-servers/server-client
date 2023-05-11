@@ -90,7 +90,7 @@ public class AfspResponseParserTest {
         // Act
         try {
             response = parser.parseResponse(mock(SocketChannel.class));
-        } catch (AfspParsingException | AfspResponseException e) {
+        } catch (AfspParsingException | AfspResponseException | AfspProcessingException e) {
             fail("Error thrown when parsing valid response");
         }
 
@@ -124,7 +124,7 @@ public class AfspResponseParserTest {
         // Act
         try {
             response = parser.parseResponse(mock(SocketChannel.class));
-        } catch (AfspParsingException | AfspResponseException e) {
+        } catch (AfspParsingException | AfspResponseException | AfspProcessingException e) {
             fail("Error thrown when parsing valid response");
         }
         //Assert
