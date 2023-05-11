@@ -6,6 +6,8 @@ import afsp.exception.AfspProcessingException;
 import afsp.AfspStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sound.midi.Soundbank;
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -34,15 +36,16 @@ public class AfspFileHandler {
         updateFileList();
     }
 
-    private void updateFileList(){
+    private void updateFileList() {
         File file = new File(localFileDir);
-        if (file.isDirectory() && file.exists()){
+        if (file.isDirectory() && file.exists()) {
             fileList = Arrays.asList(file.list());
         }
     }
 
     public List<String> getFileList() throws AfspProcessingException {
-        if (fileList == null || fileList.size() == 0){
+        this.updateFileList();
+        if (fileList == null || fileList.size() == 0) {
             throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_404_NOT_FOUND);
         }
         return fileList;
@@ -54,21 +57,21 @@ public class AfspFileHandler {
         updateFileList();
         boolean fileExists = false;
 
-        for(String _fName : fileList){
-            if( _fName.equals(fileName)){
+        for (String _fName : fileList) {
+            if (_fName.equals(fileName)) {
                 fileExists = true;
             }
         }
-        if (!fileExists){
+        if (!fileExists) {
             throw new AfspProcessingException(AfspStatusCode.CLIENT_ERROR_404_NOT_FOUND);
         }
-        Path path = Paths.get(this.localFileDir +"/"+fileName);
+        Path path = Paths.get(this.localFileDir + "/" + fileName);
         long fileSize;
         long identifier;
-        try{
+        try {
             fileSize = Files.size(path);
             identifier = Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime().toMillis();
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
         AfspHeader fileSizeHeader = new AfspHeader(AfspHeader.HeaderType.FILE_SIZE).setHeaderContent(String.valueOf(fileSize));
@@ -78,8 +81,8 @@ public class AfspFileHandler {
         return headers;
     }
 
-    public void sendFile( String fileName, int bufferSize, SocketChannel socketChannel) throws IOException {
-        Path filePath = Paths.get(localFileDir+ "/" + fileName);
+    public void sendFile(String fileName, int bufferSize, SocketChannel socketChannel) throws IOException {
+        Path filePath = Paths.get(localFileDir + "/" + fileName);
         System.out.print("\033[3m\u001B[37mSending file to " + socketChannel.socket().getInetAddress().toString() + ": \u001B[0m" + fileName + "...");
 
         FileChannel fileChannel = FileChannel.open(filePath);
@@ -95,20 +98,19 @@ public class AfspFileHandler {
 
     public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName, String identifier) throws IOException, AfspParsingException, AfspProcessingException {
 
-        Path filePath = Paths.get(localFileDir+ "/" + fileName);
-        Path tempFilePath = Paths.get(localFileDir+ "/" + fileName + ".bak");
+        Path filePath = Paths.get(localFileDir + "/" + fileName);
+        Path backupFilePath = Paths.get(localFileDir + "/" + fileName + ".bak");
 
         //test if fileFolder still exists, otherwise create it
-        if(!Files.exists(Paths.get(localFileDir))) {
-            LOGGER.info("Creating backup for " + fileName);
+        if (!Files.exists(Paths.get(localFileDir))) {
             Files.createDirectories(Paths.get(localFileDir));
         }
 
-//        // Create backup file if the file already exists on server
-//        if (Files.exists(filePath)) {
-//            LOGGER.info(" ** CREATING BACKUP ** ");
-//            Files.move(filePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
-//        }
+        // Create backup file if the file already exists on server
+        if (Files.exists(filePath)) {
+            LOGGER.info(" ** CREATING BACKUP ** ");
+            Files.move(filePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
+        }
 
         System.out.print("\033[3m\u001B[37mDownloading file: \u001B[0m" + fileName + "...");
 
@@ -120,7 +122,7 @@ public class AfspFileHandler {
         // Create directories
         Files.createDirectories(filePath.getParent());
 
-        FileChannel fileChannel = FileChannel.open(tempFilePath.toAbsolutePath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        FileChannel fileChannel = FileChannel.open(filePath.toAbsolutePath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
         while (channel.read(buffer) >= 0) {
@@ -141,30 +143,40 @@ public class AfspFileHandler {
                 break;
             }
         }
-        System.out.println("/n/n");
-        //check if the filesize of the newly created file matches the header, and if not delete it and throw an error
-        long fileSizeClient = Files.size(tempFilePath);
-        if (fileSize != fileSizeClient) {
-            LOGGER.info("** RECEIVED CORRUPT FILE: " + fileName + " **");
-            Files.delete(tempFilePath);
-            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
-        }
-        //else if it matched, move the temp file to the permanent location
-        else {
-            LOGGER.info(" ** DELETING BACKUP ** ");
-            Files.move(tempFilePath, filePath, StandardCopyOption.REPLACE_EXISTING);        }
+        System.out.println("\n\n");
 
         fileChannel.close();
 
         FileTime lastModifiedTime = FileTime.fromMillis(Long.parseLong(identifier));
         Files.setAttribute(filePath, "basic:lastModifiedTime", lastModifiedTime, LinkOption.NOFOLLOW_LINKS);
 
+        //check if the filesize of the newly created file matches the header, and if not delete it and throw an error
+        long fileSizeReceived = Files.size(filePath);
+        LOGGER.info(fileSizeReceived + ", " + fileSize);
+        if (fileSize != fileSizeReceived) {
+            LOGGER.info("** RECEIVED CORRUPT FILE: " + fileName + " **");
+            Files.delete(filePath);
+            if (Files.exists(backupFilePath)) {
+                LOGGER.info(" ** RESTORING BACKUP ** ");
+                Files.move(backupFilePath, filePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+
+        }
+        //else if it matched. check for a backup file and delete it
+        else {
+            if (Files.exists(backupFilePath)) {
+                LOGGER.info(" ** DELETING BACKUP ** ");
+                Files.delete(backupFilePath);
+            }
+        }
+
         System.out.println("\u001B[32m\033[1mSUCCESS!!\u001B[0m");
     }
 
     public void deleteFile(String targetFile) throws AfspProcessingException {
-        Path path = Path.of(localFileDir+"/"+targetFile);
-        if(Files.exists(path)) {
+        Path path = Path.of(localFileDir + "/" + targetFile);
+        if (Files.exists(path)) {
             try {
                 // Attempt to delete the file
                 Files.delete(path);
@@ -176,7 +188,7 @@ public class AfspFileHandler {
         }
     }
 
-    private String getFullPath(String fileName){
+    private String getFullPath(String fileName) {
         return localFileDir + FileSystems.getDefault().getSeparator() + fileName;
     }
 
