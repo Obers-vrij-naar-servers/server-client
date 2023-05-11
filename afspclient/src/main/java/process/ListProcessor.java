@@ -31,12 +31,13 @@ public class ListProcessor extends BaseProcessor {
         try {
             AfspResponseParser parser = new AfspResponseParser();
             response = parser.parseResponse(this.socket);
+            LOGGER.info(" ** " + response.toString());
             String responseContent = response.getBody();
             // Strip \n from response
             responseContent = responseContent.substring(0, responseContent.length() - 1);
 
             List<AfspHeader> responseHeaders = response.getHeaderList();
-
+            ;
             // Split response into separate file names
             String[] fileNames = responseContent.split("\\n");
 

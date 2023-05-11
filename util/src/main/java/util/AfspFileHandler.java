@@ -7,7 +7,9 @@ import afsp.AfspStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.*;
+import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.*;
@@ -91,21 +93,22 @@ public class AfspFileHandler {
         System.out.print("\u001B[32m\033[1m SUCCESS!!\u001B[0m\n");
     }
 
-    public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName, String identifier) throws IOException, AfspParsingException {
+    public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName, String identifier) throws IOException, AfspParsingException, AfspProcessingException {
 
         Path filePath = Paths.get(localFileDir+ "/" + fileName);
-        Path backupFilePath = Paths.get(localFileDir+ "/" + fileName + ".bak");
+        Path tempFilePath = Paths.get(localFileDir+ "/" + fileName + ".bak");
 
-        // Mocht de Files-folder zijn verwijderd, maakt hij eerst een nieuwe aan.
+        //test if fileFolder still exists, otherwise create it
         if(!Files.exists(Paths.get(localFileDir))) {
             LOGGER.info("Creating backup for " + fileName);
             Files.createDirectories(Paths.get(localFileDir));
         }
 
-        // Create backup file if the file already exists on server
-        if (Files.exists(filePath)) {
-            Files.move(filePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
-        }
+//        // Create backup file if the file already exists on server
+//        if (Files.exists(filePath)) {
+//            LOGGER.info(" ** CREATING BACKUP ** ");
+//            Files.move(filePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
+//        }
 
         System.out.print("\033[3m\u001B[37mDownloading file: \u001B[0m" + fileName + "...");
 
@@ -114,13 +117,13 @@ public class AfspFileHandler {
         int dotCount = 0;
         long tenPercent = fileSize / 10;
 
-        // Maak de benodigde mappen aan
+        // Create directories
         Files.createDirectories(filePath.getParent());
 
-        FileChannel fileChannel = FileChannel.open(filePath.toAbsolutePath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        FileChannel fileChannel = FileChannel.open(tempFilePath.toAbsolutePath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 
-        while (channel.read(buffer) != -1) {
+        while (channel.read(buffer) >= 0) {
             buffer.flip();
             fileChannel.write(buffer);
             bytesWritten += buffer.limit();
@@ -134,27 +137,22 @@ public class AfspFileHandler {
                     dotCount++;
                 }
             }
-
-            if (fileChannel.size() >= fileSize) {
+            if (bytesWritten >= fileSize) {
                 break;
             }
         }
-
-        //check if the filesize of the newly created file matches the header, and if not restore the backup
-        long fileSizeClient = Files.size(filePath);
+        System.out.println("/n/n");
+        //check if the filesize of the newly created file matches the header, and if not delete it and throw an error
+        long fileSizeClient = Files.size(tempFilePath);
         if (fileSize != fileSizeClient) {
-            LOGGER.info("Restoring backup for file " + fileName);
-            if (Files.exists(backupFilePath)) {
-                Files.move(backupFilePath, filePath, StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                Files.delete(filePath);
-            }
+            LOGGER.info("** RECEIVED CORRUPT FILE: " + fileName + " **");
+            Files.delete(tempFilePath);
             throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
-        //else if it matched, delete the created backup file
+        //else if it matched, move the temp file to the permanent location
         else {
-            Files.delete(backupFilePath);
-        }
+            LOGGER.info(" ** DELETING BACKUP ** ");
+            Files.move(tempFilePath, filePath, StandardCopyOption.REPLACE_EXISTING);        }
 
         fileChannel.close();
 
