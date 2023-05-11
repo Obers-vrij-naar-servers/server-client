@@ -48,7 +48,6 @@ public class GetProcessor extends RequestProcessor {
             //TODO HANDLE ERROR
             e.printStackTrace();
         }
-        //    public static void sendFile( String fileName, int bufferSize, SocketChannel socketChannel) throws IOException {
         try{
             fileHandler.sendFile(target, bufferSize, channel);
         }catch (IOException e) {

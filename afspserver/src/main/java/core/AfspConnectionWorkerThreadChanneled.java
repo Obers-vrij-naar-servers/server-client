@@ -12,17 +12,19 @@ import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
 
-public class AfspConnectionWorkerThreadChanneled extends Thread{
+public class AfspConnectionWorkerThreadChanneled extends Thread {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AfspConnectionWorkerThreadChanneled.class);
 
     private final SocketChannel channel;
+
     public AfspConnectionWorkerThreadChanneled(SocketChannel channel) throws IOException {
         this.channel = channel;
         LOGGER.debug("CREATED");
     }
+
     @Override
-    public void run(){
+    public void run() {
 
         AfspRequestParser parser = new AfspRequestParser();
         AfspRequest request;
@@ -44,27 +46,27 @@ public class AfspConnectionWorkerThreadChanneled extends Thread{
                 LOGGER.info(" ** PROCESSING POST **");
                 processor = new PostProcessor(request, response, channel);
             }
-            if(request.getMethod()==AfspMethod.DELETE){
+            if (request.getMethod() == AfspMethod.DELETE) {
                 LOGGER.info(" ** PROCESSING DELETE **");
-                processor = new DeleteProcessor(request,response,channel);
+                processor = new DeleteProcessor(request, response, channel);
             }
-            if (processor == null){
+            if (processor == null) {
                 throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
             }
             processor.process();
 
-
+            //if error is thrown in processing, make it a response
         } catch (AfspParsingException | AfspProcessingException e) {
-                response = new AfspResponse(e.getErrorCode());
-        } finally {
+            response = new AfspResponse(e.getErrorCode());
             OutputStream out = Channels.newOutputStream(channel);
             try {
                 out.write(response.toString().getBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         }
-
     }
-
 }
+
+
+
