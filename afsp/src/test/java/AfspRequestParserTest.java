@@ -1,26 +1,81 @@
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicReference;
 
-import afsp.AfspMethod;
-import afsp.AfspRequest;
-import afsp.AfspRequestParser;
-import afsp.AfspStatusCode;
+import afsp.*;
 import afsp.exception.AfspParsingException;
-import afsp.exception.AfspProcessingException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-class AfspRequestParserTest {
+class TestAfspRequestParser {
 
     private InputStreamMocker mocker = new InputStreamMocker();
 
+    private TestServer server;
+    private TestClient client;
+    private SocketChannel serverChannel;
+    private SocketChannel clientChannel;
+
+    @BeforeEach
+    public void setUp() throws IOException, InterruptedException {
+
+        server = new TestServer();
+        client = new TestClient();
+        server.run();
+        client.run();
+
+        serverChannel = server.getChannel();
+        clientChannel = client.getChannel();
+
+    }
+
+    @AfterEach
+    public void cleanUp() throws IOException {
+        server.stopServer().interrupt();
+        client.stopServer().interrupt();
+    }
+
+    @Test
+    void testParseValidRequestWithMultiThreadedChannels() throws AfspParsingException, InterruptedException {
+        //Arrange
+        var outRequest = new AfspRequest();
+        AtomicReference<AfspRequest> inRequest = new AtomicReference<>();
+        outRequest.setMethod(AfspMethod.LIST);
+        outRequest.setRequestTarget("/");
+        var parser = new AfspRequestParser();
+
+        //Act
+        Thread serverThread = new Thread(() -> {
+            try {
+                inRequest.set(parser.parseAfspRequest(serverChannel));
+            } catch (AfspParsingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Thread clientThread = new Thread(() -> {
+            try {
+                clientChannel.write(ByteBuffer.wrap(outRequest.toString().getBytes()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        serverThread.start();
+        clientThread.start();
+
+        serverThread.join();
+        clientThread.join();
+
+        //Assert
+        assertEquals(outRequest.getMethod(), inRequest.get().getMethod());
+        assertEquals(outRequest.getRequestTarget(),inRequest.get().getRequestTarget());
+    }
 
     @Test
     void testParseAfspRequest_validRequest() throws Exception {
@@ -35,6 +90,7 @@ class AfspRequestParserTest {
         assertEquals("/", request.getRequestTarget());
         assertEquals("AFSP/1.0", request.getProtocol());
     }
+
 
     @Test
     void testParseAfspRequest_invalidMethod() throws Exception {
@@ -93,7 +149,7 @@ class AfspRequestParserTest {
     @Test
     void testParseAfspRequest_MissingCRorLF() throws Exception {
         //Arrange
-        InputStreamReader reader =  getMissingCROrLF_InputReader();
+        InputStreamReader reader = getMissingCROrLF_InputReader();
         AfspRequestParser parser = new AfspRequestParser(reader);
         AfspParsingException error = null;
         //Act
@@ -109,7 +165,6 @@ class AfspRequestParserTest {
     }
 
     //helper methods
-
 
     private InputStreamReader getValidRequest_InputReader() throws IOException {
         AfspRequest request;
@@ -143,7 +198,7 @@ class AfspRequestParserTest {
         return mocker.getReader(request);
     }
 
-    private InputStreamReader getMissingCROrLF_InputReader()  {
+    private InputStreamReader getMissingCROrLF_InputReader() {
         var request = "GET /path/to/resource AFSP/1.0\n";
         return mocker.getReader(request);
     }
