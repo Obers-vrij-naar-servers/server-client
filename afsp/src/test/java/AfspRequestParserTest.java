@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import afsp.*;
 import afsp.exception.AfspParsingException;
+import afsp.exception.AfspProcessingException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class AfspRequestParserTest {
-
-    private InputStreamMocker mocker = new InputStreamMocker();
 
     private TestServer server;
     private TestClient client;
@@ -42,20 +41,119 @@ class AfspRequestParserTest {
     }
 
     @Test
-    void testParseValidRequestWithMultiThreadedChannels() throws AfspParsingException, InterruptedException {
+    void parseValidRequestTest() throws Exception {
         //Arrange
         var outRequest = new AfspRequest();
-        AtomicReference<AfspRequest> inRequest = new AtomicReference<>();
+        AfspRequest inRequest = null;
         outRequest.setMethod(AfspMethod.LIST);
         outRequest.setRequestTarget("/");
-        var parser = new AfspRequestParser();
 
+        //Act
+        try {
+            inRequest = transferRequest(outRequest.toString());
+        }   catch (AfspParsingException e){
+            fail("Error thrown on parsing valid request");
+        }
+
+        //Assert
+        assertNotNull(inRequest);
+        assertEquals(outRequest.getMethod(), inRequest.getMethod());
+        assertEquals(outRequest.getRequestTarget(),inRequest.getRequestTarget());
+    }
+
+
+    @Test
+    void parseInvalidRequestTest() throws Exception {
+        //Arrange
+        String outRequest = getInvalidMethodRequestString();
+        AfspParsingException error=null;
+        try {
+            transferRequest(outRequest);
+        }   catch (AfspParsingException e){
+            error = e;
+        }
+        //Assert
+        assertNotNull(error,"No error thrown on bad request method");
+        assertEquals(AfspStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED, error.getErrorCode());
+    }
+
+    @Test
+    void parseInvalidRequestTargetTest() throws Exception {
+        //Arrange
+        String outRequest = getInvalidRequestTargetString();
+        AfspParsingException error=null;
+        try {
+            transferRequest(outRequest);
+        }   catch (AfspParsingException e){
+            error = e;
+        }
+        assertNotNull(error,"No error thrown on invalid request target");
+        assertEquals(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST, error.getErrorCode());
+    }
+
+    @Test
+    void parseInvalidProtocolTest() throws Exception {
+        //Arrange
+        String outRequest = getInvalidProtocolString();
+        AfspParsingException error=null;
+        try {
+            transferRequest(outRequest);
+        }   catch (AfspParsingException e){
+            error = e;
+        }
+
+        assertNotNull(error,"No error thrown on invalid protocol");
+        assertEquals(AfspStatusCode.SERVER_ERROR_505_PROTOCOL_NOT_SUPPORTED, error.getErrorCode());
+    }
+
+    @Test
+    void testParseAfspRequest_MissingCRorLF() throws Exception {
+        //Arrange
+        var outRequest = getMissingCROrLFString();
+        AfspParsingException error=null;
+        try {
+            transferRequest(outRequest);
+        }   catch (AfspParsingException e){
+            error = e;
+        }
+        assertNotNull(error,"No error thrown on missing CR");
+        assertEquals(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST, error.getErrorCode());
+    }
+
+    //helper methods
+
+    private String getInvalidMethodRequestString() {
+        return "BAD /path/to/resource AFSP/1.0\r\n" +
+                "\r\n" +
+                "Host: localhost\r\n";
+    }
+
+    private String getInvalidRequestTargetString() throws AfspParsingException {
+        var request = new AfspRequest();
+        request.setMethod(AfspMethod.GET);
+        request.setRequestTarget(" ");
+        return request.toString();
+    }
+
+    private String getInvalidProtocolString() {
+        return "GET /path/to/resource AFSP/2.0\r\n";
+    }
+
+    private String getMissingCROrLFString() {
+        return "GET /path/to/resource AFSP/1.0\n";
+    }
+
+
+    private AfspRequest transferRequest(String outRequest) throws Exception{
+        AtomicReference<AfspRequest> inRequest = new AtomicReference<>();
+        var parser = new AfspRequestParser();
+        AtomicReference<AfspParsingException> error = new AtomicReference<>();
         //Act
         Thread serverThread = new Thread(() -> {
             try {
                 inRequest.set(parser.parseAfspRequest(serverChannel));
             } catch (AfspParsingException e) {
-                throw new RuntimeException(e);
+                error.set(e);
             }
         });
 
@@ -63,7 +161,6 @@ class AfspRequestParserTest {
             try {
                 clientChannel.write(ByteBuffer.wrap(outRequest.toString().getBytes()));
             } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         });
         serverThread.start();
@@ -72,135 +169,9 @@ class AfspRequestParserTest {
         serverThread.join();
         clientThread.join();
 
-        //Assert
-        assertEquals(outRequest.getMethod(), inRequest.get().getMethod());
-        assertEquals(outRequest.getRequestTarget(),inRequest.get().getRequestTarget());
-    }
-
-    @Test
-    void testParseAfspRequest_validRequest() throws Exception {
-        //Arrange
-        InputStreamReader reader = getValidRequest_InputReader();
-        AfspRequestParser parser = new AfspRequestParser(reader);
-        //Act
-        AfspRequest request = parser.parseAfspRequest(mock(SocketChannel.class));
-
-        //Assert
-        assertEquals(AfspMethod.LIST, request.getMethod());
-        assertEquals("/", request.getRequestTarget());
-        assertEquals("AFSP/1.0", request.getProtocol());
-    }
-
-
-    @Test
-    void testParseAfspRequest_invalidMethod() throws Exception {
-        //Arrange
-        InputStreamReader reader = getInvalidMethod_InputReader();
-        AfspRequestParser parser = new AfspRequestParser(reader);
-        AfspParsingException error = null;
-        //Act
-        try {
-            parser.parseAfspRequest(mock(SocketChannel.class));
-        } catch (AfspParsingException e) {
-            error = e;
+        if (error.get() != null) {
+            throw error.get();
         }
-        if (error == null) {
-            fail("No error thrown on BAD request");
-        }
-        assertEquals(AfspStatusCode.SERVER_ERROR_501_NOT_IMPLEMENTED, error.getErrorCode());
+        return inRequest.get();
     }
-
-    @Test
-    void testParseAfspRequest_invalidRequestTarget() throws Exception {
-        //Arrange
-        InputStreamReader reader = getInvalidRequestTarget_InputReader();
-        AfspRequestParser parser = new AfspRequestParser(reader);
-        AfspParsingException error = null;
-        //Act
-        try {
-            parser.parseAfspRequest(mock(SocketChannel.class));
-        } catch (AfspParsingException e) {
-            error = e;
-        }
-        if (error == null) {
-            fail("No error thrown on SP target");
-        }
-        assertEquals(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST, error.getErrorCode());
-    }
-
-    @Test
-    void testParseAfspRequest_invalidProtocolVersion() throws Exception {
-        //Arrange
-        InputStreamReader reader = getInvalidProtocolVersion_InputReader();
-        AfspRequestParser parser = new AfspRequestParser(reader);
-        AfspParsingException error = null;
-        //Act
-        try {
-            parser.parseAfspRequest(mock(SocketChannel.class));
-        } catch (AfspParsingException e) {
-            error = e;
-        }
-        if (error == null) {
-            fail("No error thrown on AFSP/2.0 protocol");
-        }
-        assertEquals(AfspStatusCode.SERVER_ERROR_505_PROTOCOL_NOT_SUPPORTED, error.getErrorCode());
-    }
-
-    @Test
-    void testParseAfspRequest_MissingCRorLF() throws Exception {
-        //Arrange
-        InputStreamReader reader = getMissingCROrLF_InputReader();
-        AfspRequestParser parser = new AfspRequestParser(reader);
-        AfspParsingException error = null;
-        //Act
-        try {
-            parser.parseAfspRequest(mock(SocketChannel.class));
-        } catch (AfspParsingException e) {
-            error = e;
-        }
-        if (error == null) {
-            fail("No error thrown on missing CR protocol");
-        }
-        assertEquals(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST, error.getErrorCode());
-    }
-
-    //helper methods
-
-    private InputStreamReader getValidRequest_InputReader() throws IOException {
-        AfspRequest request;
-        try {
-            request = new AfspRequest().setMethod(AfspMethod.LIST).setRequestTarget("/");
-        } catch (AfspParsingException e) {
-            throw new IOException(e);
-        }
-        return mocker.getReader(request.toString());
-    }
-
-
-    private InputStreamReader getInvalidMethod_InputReader() {
-        var request = "BAD /path/to/resource AFSP/1.0\r\n" +
-                "\r\n" +
-                "Host: localhost\r\n";
-
-        return mocker.getReader(request);
-
-    }
-
-    private InputStreamReader getInvalidRequestTarget_InputReader() throws AfspParsingException {
-        var request = new AfspRequest();
-        request.setMethod(AfspMethod.GET);
-        request.setRequestTarget(" ");
-        return mocker.getReader(request.toString());
-    }
-
-    private InputStreamReader getInvalidProtocolVersion_InputReader() {
-        var request = "GET /path/to/resource AFSP/2.0\r\n";
-        return mocker.getReader(request);
-    }
-
-    private InputStreamReader getMissingCROrLF_InputReader() {
-        var request = "GET /path/to/resource AFSP/1.0\n";
-        return mocker.getReader(request);
-    }
-
 }

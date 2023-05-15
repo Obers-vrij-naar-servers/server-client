@@ -25,7 +25,6 @@ public class TestClient extends Thread{
         } else {
             throw new RuntimeException();
         }
-
     }
 
     public TestClient stopServer() throws IOException {
