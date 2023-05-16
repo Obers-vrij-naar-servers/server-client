@@ -137,7 +137,7 @@ public class AfspFileHandlerTest {
         //max 5 times to create the file
         while (tryCount < 5) {
             try {
-                fileCreater.createFile(fileSize, "temp.txt", 1);
+                fileCreater.createFile(fileSize, "fiveGigs.txt", 1);
                 break;
             } catch (IOException e) {
                 if (tryCount < 5){
@@ -151,7 +151,7 @@ public class AfspFileHandlerTest {
 
         Thread serverThread = new Thread(() -> {
             try {
-                serverFileHandler.receiveFile(clientChannel, fileSize, 8192, "temp.txt", "1");
+                serverFileHandler.receiveFile(clientChannel, fileSize, 8192, "fiveGigs.txt", "1");
             } catch (IOException | AfspParsingException | AfspProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -159,7 +159,7 @@ public class AfspFileHandlerTest {
 
         Thread clientThread = new Thread(() -> {
             try {
-                clientFileHandler.sendFile("temp.txt", 8192, serverChannel);
+                clientFileHandler.sendFile("fiveGigs.txt", 8192, serverChannel);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -172,8 +172,8 @@ public class AfspFileHandlerTest {
         clientThread.join();
 
         //Assert
-        assertTrue(Files.exists(targetDir.resolve("temp.txt")));
-        assertEquals(fileSize,Files.size(targetDir.resolve("temp.txt")));
+        assertTrue(Files.exists(targetDir.resolve("fiveGigs.txt")));
+        assertEquals(fileSize,Files.size(targetDir.resolve("fiveGigs.txt")));
     }
 
     @Test
