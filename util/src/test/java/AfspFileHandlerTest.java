@@ -1,10 +1,12 @@
 import afsp.AfspHeader;
 import afsp.AfspRequest;
+import afsp.exception.AfspException;
 import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.sun.source.tree.AssertTree;
 import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.fail;
 
@@ -36,11 +39,6 @@ public class AfspFileHandlerTest {
     private AfspFileHandler clientFileHandler = new AfspFileHandler(sourceDir.toString());
     private FileCreater fileCreater = new FileCreater();
 
-    @Before
-    public void setupGeneral() {
-
-
-    }
 
     @BeforeEach
     public void setUp() throws IOException, InterruptedException {
@@ -89,10 +87,10 @@ public class AfspFileHandlerTest {
         //max 5 times to create the file
         while (tryCount < 5) {
             try {
-                fileCreater.createLoremIpsumFile("temp.txt", 1);
+                fileCreater.createLoremIpsumFile("lorem.txt", 1);
                 break;
             } catch (IOException e) {
-                if (tryCount < 5){
+                if (tryCount < 5) {
                     tryCount += 1;
                 } else {
                     fail("Could not create file to send");
@@ -103,7 +101,7 @@ public class AfspFileHandlerTest {
 
         Thread serverThread = new Thread(() -> {
             try {
-                serverFileHandler.receiveFile(clientChannel, 827, 8192, "temp.txt", "1");
+                serverFileHandler.receiveFile(clientChannel, 827, 8192, "lorem.txt", "1");
             } catch (IOException | AfspParsingException | AfspProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -111,7 +109,7 @@ public class AfspFileHandlerTest {
 
         Thread clientThread = new Thread(() -> {
             try {
-                clientFileHandler.sendFile("temp.txt", 8192, serverChannel);
+                clientFileHandler.sendFile("lorem.txt", 8192, serverChannel);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -124,12 +122,62 @@ public class AfspFileHandlerTest {
         clientThread.join();
 
         // get file-content
-        String fileContent = new String(Files.readAllBytes(targetDir.resolve("temp.txt")),StandardCharsets.UTF_8);
+        String fileContent = new String(Files.readAllBytes(targetDir.resolve("lorem.txt")), StandardCharsets.UTF_8);
         //Assert
-        assertTrue(Files.exists(targetDir.resolve("temp.txt")));
-        assertEquals(FileCreater.loremIpsum,fileContent);
+        assertTrue(Files.exists(targetDir.resolve("lorem.txt")));
+        assertEquals(FileCreater.loremIpsum, fileContent);
 
     }
+
+    @Test
+    public void testFailOnWrongIdentifier() throws InterruptedException, IOException {
+        int tryCount = 0;
+        AtomicReference<AfspException> error = new AtomicReference<>(null);
+        //max 5 times to create the file
+        while (tryCount < 5) {
+            try {
+                fileCreater.createFile(1000, "wrongId.txt", 1);
+                break;
+            } catch (IOException e) {
+                if (tryCount < 5) {
+                    tryCount += 1;
+                } else {
+                    fail("Could not create file to send");
+                    return;
+                }
+            }
+        }
+
+        Thread serverThread = new Thread(() -> {
+            try {
+                serverFileHandler.receiveFile(clientChannel, 827, 8192, "wrongId.txt", "2");
+            } catch (AfspParsingException | AfspProcessingException e) {
+                error.set(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Thread clientThread = new Thread(() -> {
+            try {
+                clientFileHandler.sendFile("wrongId.txt", 8192, serverChannel);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        // Start and join the threads
+        serverThread.start();
+        clientThread.start();
+        serverThread.join();
+        clientThread.join();
+
+
+        //Assert
+        assertNotNull(error.get());
+        assertFalse(Files.exists(targetDir.resolve("wrongId.txt")));
+    }
+
     @Test
     public void testSend5GBFile() throws InterruptedException, IOException {
         long fileSize = Long.parseLong("5368709120");
@@ -140,7 +188,7 @@ public class AfspFileHandlerTest {
                 fileCreater.createFile(fileSize, "fiveGigs.txt", 1);
                 break;
             } catch (IOException e) {
-                if (tryCount < 5){
+                if (tryCount < 5) {
                     tryCount += 1;
                 } else {
                     fail("Could not create file to send");
@@ -173,24 +221,25 @@ public class AfspFileHandlerTest {
 
         //Assert
         assertTrue(Files.exists(targetDir.resolve("fiveGigs.txt")));
-        assertEquals(fileSize,Files.size(targetDir.resolve("fiveGigs.txt")));
+        assertEquals(fileSize, Files.size(targetDir.resolve("fiveGigs.txt")));
     }
 
     @Test
     public void testGetFileList() throws IOException, AfspProcessingException {
         // Arrange
-        for (int i = 0;i<5;i++){
-            fileCreater.createFile(100,"fileList_"+i+".text",1);
+        for (int i = 0; i < 5; i++) {
+            fileCreater.createFile(100, "fileList_" + i + ".text", 1);
         }
         //act
         var fileList = clientFileHandler.getFileList();
         //Assert
-        assertEquals(5,fileList.size());
+        assertEquals(5, fileList.size());
     }
+
     @Test
     public void testGetFileInfo() throws IOException, AfspProcessingException {
         //Arrange
-        fileCreater.createFile(1000,"fileInfo.txt",100);
+        fileCreater.createFile(1000, "fileInfo.txt", 100);
         //Act
         var request = new AfspRequest();
         List<AfspHeader> headerList = clientFileHandler.getFileInfo("fileInfo.txt");
@@ -198,15 +247,15 @@ public class AfspFileHandlerTest {
         var fileSizeHeader = request.getHeader(AfspHeader.HeaderType.FILE_SIZE);
         var identifierHeader = request.getHeader(AfspHeader.HeaderType.IDENTIFIER);
         //Assert
-        assertEquals("1000",fileSizeHeader.getHeaderContent());
-        assertEquals("100",identifierHeader.getHeaderContent());
+        assertEquals("1000", fileSizeHeader.getHeaderContent());
+        assertEquals("100", identifierHeader.getHeaderContent());
     }
 
     @Test
     public void deleteFile() throws IOException {
         //Arrange
-        fileCreater.createFile(1000,"deleteFile.txt",100);
-        fileCreater.createFile(1000,"dontDeleteFile.txt",100);
+        fileCreater.createFile(1000, "deleteFile.txt", 100);
+        fileCreater.createFile(1000, "dontDeleteFile.txt", 100);
 
         //Act
         try {
