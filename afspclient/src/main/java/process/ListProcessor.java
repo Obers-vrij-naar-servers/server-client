@@ -5,10 +5,16 @@ import afsp.AfspRequest;
 import afsp.AfspResponse;
 import afsp.AfspResponseParser;
 import afsp.exception.AfspProcessingException;
+import config.Configuration;
 import config.ConfigurationManager;
+import core.PromptResponse;
+import factory.RequestFactory;
 import util.AfspFileHandler;
 import util.FileInfo;
+import util.Helper;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,19 +24,33 @@ import static afsp.AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR;
 
 public class ListProcessor extends BaseProcessor {
     List<String> files;
-
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+    private final RequestFactory requestFactory = new RequestFactory();
+    private SocketChannel socketChannel;
+    private AfspResponse response;
 
-    public ListProcessor(SocketChannel socket, AfspRequest request, AfspResponse response) {
-        super(socket,request, response);
+    public ListProcessor(PromptResponse promptResponse, Configuration conf) {
+        super(promptResponse, conf);
     }
 
-    @Override
     public void process() throws Exception {
 
-        try {
+        try (SocketChannel socketChannel = SocketChannel.open()) {
+            InetSocketAddress address = new InetSocketAddress(conf.getHost(), conf.getPort());
+            socketChannel.connect(address);
+
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            AfspRequest request = requestFactory.createRequest(promptResponse);
+
+            buffer.put(request.toString().getBytes());
+            buffer.flip();
+            socketChannel.write(buffer);
+            buffer.clear();
+
+            AfspResponse response = new AfspResponse();
+
             AfspResponseParser parser = new AfspResponseParser();
-            response = parser.parseResponse(this.socket);
+            response = parser.parseResponse(socketChannel);
             LOGGER.info(" ** " + response.toString());
             String responseContent = response.getBody();
             // Strip \n from response
@@ -57,6 +77,8 @@ public class ListProcessor extends BaseProcessor {
 
         } catch (Exception e) {
             throw new AfspProcessingException(SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+        } finally {
+            Helper.closeChanelConnections(socketChannel);
         }
 
     }

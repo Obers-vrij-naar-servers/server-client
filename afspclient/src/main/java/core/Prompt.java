@@ -4,21 +4,25 @@ import afsp.AfspStatusCode;
 import afsp.exception.AfspProcessingException;
 import config.Configuration;
 import config.ConfigurationManager;
+import process.*;
 import util.AfspFileHandler;
+import util.Helper;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Prompt {
 
     private final PromptResponse promptResponse = new PromptResponse();
 
-    private final PromptHandler promptHandler;
+    private final Configuration conf;
     private boolean firstPrompt = true;
     private boolean ready = false;
     private final AfspFileHandler fileHandler = new AfspFileHandler(ConfigurationManager.getInstance().getCurrentConfiguration().getFolder());
+    private BaseProcessor processor;
 
     public Prompt(Configuration conf) {
-        this.promptHandler = new PromptHandler(conf);
+        this.conf = conf;
     }
 
     public void start(String folder) {
@@ -26,7 +30,30 @@ public class Prompt {
             prompt(folder);
 
             if (ready) {
-                promptHandler.handle(promptResponse);
+                if (promptResponse.getAction() == Action.SHOW_ALL_FILES) {
+                    processor = new ListProcessor(promptResponse, conf);
+                }
+
+                if (promptResponse.getAction() == Action.Download_FILE) {
+                    processor = new GetProcessor(promptResponse, conf);
+                }
+
+                if (promptResponse.getAction() == Action.DELETE_FILE_FROM_SERVER) {
+                    processor = new DeleteProcessor(promptResponse, conf);
+                }
+
+                if (promptResponse.getAction() == Action.UPLOAD_FILES_TO_SERVER) {
+                    processor = new PostProcessor(promptResponse, conf);
+                }
+
+                try {
+                    processor.process();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    System.out.println("\u001B[31m" + "Error: " + e.getMessage() + "\u001B[0m");
+                }
+
                 firstPrompt = false;
             }
 
