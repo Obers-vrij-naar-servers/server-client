@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 
@@ -19,12 +20,17 @@ public class ServerChannelListenerThread  extends Thread{
         LOGGER.debug("CREATED");
         this.port = port;
         this.serverSocketChannel = ServerSocketChannel.open();
-        this.serverSocketChannel.bind(new InetSocketAddress(this.port));
+        try{
+            this.serverSocketChannel.bind(new InetSocketAddress(this.port));
+        } catch (BindException e){
+            System.out.println("Port already in use");
+            serverSocketChannel.close();
+        }
     }
     @Override
 
     public void run(){
-        while (true){
+        while (serverSocketChannel.isOpen()){
             try {
                 var channel = serverSocketChannel.accept();
                 LOGGER.info(" * Connection accepted: " + channel.getLocalAddress());
