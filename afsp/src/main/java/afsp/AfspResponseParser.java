@@ -19,36 +19,33 @@ public class AfspResponseParser {
 
     private InputStreamReader reader = null;
 
-    public AfspResponseParser(){
+    public AfspResponseParser() {
     }
 
-    //Constructor with reader for testing-purposes
-    public AfspResponseParser(InputStreamReader reader) {
-        this.reader = reader;
-    }
 
     public AfspResponse parseResponse(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException, AfspProcessingException {
         LOGGER.info("** Start Parsing Response **");
-        if (reader == null){
-            reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
-        }
+
+        reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
+
         AfspResponse response = new AfspResponse();
-            try {
-                parseStatusLine(reader,response);
-                AfspHeader.parseHeaders(reader,response);
-                parseBody(reader,response);
-            } catch (IOException e) {
-                throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
-            }
-            return response;
+        try {
+            parseStatusLine(reader, response);
+            AfspHeader.parseHeaders(reader, response);
+            parseBody(reader, response);
+        } catch (IOException e) {
+            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+        }
+        return response;
     }
+
     public AfspResponse parseResponseToGet(SocketChannel socketChannel) throws AfspParsingException, AfspResponseException {
         LOGGER.info("** Start Parsing Response **");
         InputStreamReader reader = new InputStreamReader(Channels.newInputStream(socketChannel), StandardCharsets.UTF_8);
         AfspResponse response = new AfspResponse();
         try {
-            parseStatusLine(reader,response);
-            AfspHeader.parseHeaders(reader,response);
+            parseStatusLine(reader, response);
+            AfspHeader.parseHeaders(reader, response);
         } catch (IOException e) {
             throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
@@ -69,7 +66,7 @@ public class AfspResponseParser {
                 }
                 _byte = reader.read();
                 if (_byte == ByteCode.LF.code) {
-                    LOGGER.info("** MESSAGE PARSED: "+responseBuffer+"**");
+                    LOGGER.info("** MESSAGE PARSED: " + responseBuffer + "**");
                     return;
                 }
             } else {
@@ -78,57 +75,58 @@ public class AfspResponseParser {
                     throw new AfspResponseException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                 }
             }
-            if (_byte == ByteCode.SP.code){
-                if (!protocolParsed){
+            if (_byte == ByteCode.SP.code) {
+                if (!protocolParsed) {
                     String _protocol = responseBuffer.toString();
                     boolean _supported = false;
-                    for (AfspProtocolVersion _version : AfspProtocolVersion.values()){
-                        if (_version.toString().equals(_protocol)){
+                    for (AfspProtocolVersion _version : AfspProtocolVersion.values()) {
+                        if (_version.toString().equals(_protocol)) {
                             _supported = true;
                             break;
                         }
                     }
-                    if (!_supported){
+                    if (!_supported) {
                         throw new AfspResponseException(AfspStatusCode.SERVER_ERROR_505_PROTOCOL_NOT_SUPPORTED);
                     }
-                    responseBuffer.delete(0,responseBuffer.length());
+                    responseBuffer.delete(0, responseBuffer.length());
                     protocolParsed = true;
-                } else if (!statusCodeParsed){
+                } else if (!statusCodeParsed) {
 
                     int _status;
                     //return bad request if status is not a number
                     try {
                         _status = Integer.parseInt(responseBuffer.toString());
-                    } catch (NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         throw new AfspResponseException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                     }
                     boolean _validStatus = false;
-                    for (AfspStatusCode statusCode: AfspStatusCode.values()){
-                        if (statusCode.STATUS_CODE == _status){
-                            LOGGER.info("** STATUSCODE PARSED: "+_status+"**");
+                    for (AfspStatusCode statusCode : AfspStatusCode.values()) {
+                        if (statusCode.STATUS_CODE == _status) {
+                            LOGGER.info("** STATUSCODE PARSED: " + _status + "**");
 
                             response.setStatusCode(_status);
                             response.setMessage(statusCode.MESSAGE);
                             _validStatus = true;
                             statusCodeParsed = true;
-                            responseBuffer.delete(0,responseBuffer.length());
+                            responseBuffer.delete(0, responseBuffer.length());
                         }
                     }
-                    if (!_validStatus){
+                    if (!_validStatus) {
                         throw new AfspResponseException(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST);
                     }
                 }
             } else {
-                responseBuffer.append((char)_byte);
+                responseBuffer.append((char) _byte);
             }
 
         }
     }
+
     private void parseBody(InputStreamReader reader, AfspResponse response) throws IOException, AfspProcessingException {
         long contentLength;
         try {
             contentLength = Long.parseLong(response.getHeader(AfspHeader.HeaderType.CONTENT_LENGTH).getHeaderContent());
-        } catch (AfspProcessingException e){
+        } catch (AfspProcessingException e) {
             LOGGER.info("** NO CONTENT-LENGTH HEADER, NOT PARSING BODY **");
             return;
         }
@@ -142,14 +140,14 @@ public class AfspResponseParser {
             if (_byte < 0) {
                 break;
             }
-            if(bodyBuffer.length() >= contentLength){
+            if (bodyBuffer.length() >= contentLength) {
                 break;
             }
             bodyBuffer.append((char) _byte);
         }
         LOGGER.info(" ** PARSING BODY DONE **");
 
-        if(bodyBuffer.length() == 0){
+        if (bodyBuffer.length() == 0) {
             return;
         }
         String body = bodyBuffer.toString();

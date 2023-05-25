@@ -7,18 +7,16 @@ import afsp.AfspStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sound.midi.Soundbank;
+
 import java.io.*;
-import java.net.Socket;
+
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
+
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -110,6 +108,7 @@ public class AfspFileHandler {
         if (Files.exists(filePath)) {
             LOGGER.info(" ** CREATING BACKUP ** ");
             Files.move(filePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
+
         }
 
         System.out.print("\033[3m\u001B[37mDownloading file: \u001B[0m" + fileName + "...");

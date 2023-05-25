@@ -1,180 +1,202 @@
 import afsp.*;
+import afsp.exception.AfspException;
 import afsp.exception.AfspParsingException;
 import afsp.exception.AfspProcessingException;
 import afsp.exception.AfspResponseException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 public class AfspResponseParserTest {
+    private TestServer server;
+    private TestClient client;
+    private SocketChannel serverChannel;
+    private SocketChannel clientChannel;
 
-    private InputStreamMocker mocker = new InputStreamMocker();
+    @BeforeEach
+    public void setUp() throws IOException, InterruptedException {
+
+        server = new TestServer();
+        client = new TestClient();
+        server.run();
+        client.run();
+
+        serverChannel = server.getChannel();
+        clientChannel = client.getChannel();
+    }
+
+    @AfterEach
+    public void cleanUp() throws IOException {
+        server.stopServer().interrupt();
+        client.stopServer().interrupt();
+    }
+
 
     @Test
-    void testParseAfspResponse_validResponse() throws Exception {
+    void parseValidResponseTest() throws Exception {
         // Arrange
-        InputStreamReader reader = getValidResponse_InputReader();
-        AfspResponseParser parser = new AfspResponseParser(reader);
-
+        var response = getValidResponseString();
+        AfspResponse incoming = null;
+        AfspException error = null;
         // Act
-        AfspResponse response = parser.parseResponse(mock(SocketChannel.class));
-
+        try {
+            incoming = transferResponse(response);
+        } catch (AfspException e) {
+            fail("Exception thrown on valid response");
+        }
         // Assert
-        assertEquals(AfspStatusCode.SERVER_SUCCESS_200_OK.STATUS_CODE, response.getStatusCode());
-        assertEquals("OK", response.getMessage());
+        assertEquals(AfspStatusCode.SERVER_SUCCESS_200_OK.STATUS_CODE, incoming.getStatusCode());
+        assertEquals("OK", incoming.getMessage());
     }
 
     @Test
     void testParseAfspResponse_invalidResponseStatusCode() throws Exception {
-        // Arrange
-        InputStreamReader reader = getInvalidResponseStatusCode_InputReader();
-        AfspResponseParser parser = new AfspResponseParser(reader);
-        AfspResponseException error = null;
-
+        //Arrange
+        var response = getInvalidResponseStatusCodeString();
+        AfspException error = null;
         // Act
         try {
-            parser.parseResponse(mock(SocketChannel.class));
-        } catch (AfspResponseException e) {
+            transferResponse(response);
+        } catch (AfspException e) {
             error = e;
         }
-
-        // Assert
         assertNotNull(error);
         assertEquals(AfspStatusCode.CLIENT_ERROR_400_BAD_REQUEST, error.getErrorCode());
     }
 
     @Test
-    void testParseAfspResponse_invalidProtocolVersion() throws Exception {
-        // Arrange
-        InputStreamReader reader = getInvalidProtocolVersion_InputReader();
-        AfspResponseParser parser = new AfspResponseParser(reader);
-        AfspResponseException error = null;
-
+    void parseInvalidProtocolResponseTest() throws Exception {
+        //Arrange
+        var response = getInvalidProtocolVersionString();
+        AfspException error = null;
         // Act
         try {
-            parser.parseResponse(mock(SocketChannel.class));
-        } catch (AfspResponseException e) {
+            transferResponse(response);
+        } catch (AfspException e) {
             error = e;
         }
-
-        // Assert
         assertNotNull(error);
         assertEquals(AfspStatusCode.SERVER_ERROR_505_PROTOCOL_NOT_SUPPORTED, error.getErrorCode());
     }
 
+    //
     @Test
     void testParseBody_emptyBody() throws Exception {
         // Arrange
-        InputStreamReader reader = getEmptyBody_InputReader();
-        AfspResponseParser parser = new AfspResponseParser(reader);
-        AfspResponse response = new AfspResponse();
-
+        var response = getEmptyBodyResponseString();
+        AfspResponse incoming = null;
+        AfspException error = null;
         // Act
-        parser.parseResponse(mock(SocketChannel.class));
+        try {
+            incoming = transferResponse(response);
+        } catch (AfspException e) {
+            fail("Exception thrown on valid response");
+        }
         // Assert
-        assertEquals("", response.getBody());
+        assertEquals(AfspStatusCode.SERVER_SUCCESS_200_OK.STATUS_CODE, incoming.getStatusCode());
+        assertEquals("", incoming.getBody());
     }
 
     @Test
-    void testResponseWithHeaders_noBody() {
-        InputStreamReader reader = getAllHeaders_noBody_InputReader();
-        AfspResponseParser parser = new AfspResponseParser(reader);
-        AfspResponse response = new AfspResponse();
-
+    void testResponseWithHeaders_noBody() throws Exception {
+        // Arrange
+        var response = getAllHeadersNoBodyResponseString();
+        AfspResponse incoming = null;
+        AfspException error = null;
         // Act
         try {
-            response = parser.parseResponse(mock(SocketChannel.class));
-        } catch (AfspParsingException | AfspResponseException | AfspProcessingException e) {
-            fail("Error thrown when parsing valid response");
+            incoming = transferResponse(response);
+        } catch (AfspException e) {
+            fail("Exception thrown on valid response");
         }
 
         String contentLengthContent;
         String charsetContent;
         try {
-            contentLengthContent = response.getHeader(AfspHeader.HeaderType.CONTENT_LENGTH).getHeaderContent();
+            contentLengthContent = incoming.getHeader(AfspHeader.HeaderType.CONTENT_LENGTH).getHeaderContent();
         } catch (Exception e) {
             fail("Content-length header content not found");
             return;
         }
         try {
-            charsetContent = response.getHeader(AfspHeader.HeaderType.CHARSET).getHeaderContent();
+            charsetContent = incoming.getHeader(AfspHeader.HeaderType.CHARSET).getHeaderContent();
         } catch (Exception e) {
             fail("Charset header content not found");
             return;
         }
 
         //Assert
-        assertTrue(response.containsHeaders(AfspHeader.HeaderType.CONTENT_LENGTH));
-        assertTrue(response.containsHeaders(AfspHeader.HeaderType.CHARSET));
+        assertTrue(incoming.containsHeaders(AfspHeader.HeaderType.CONTENT_LENGTH));
+        assertTrue(incoming.containsHeaders(AfspHeader.HeaderType.CHARSET));
         assertEquals("1234", contentLengthContent);
         assertEquals("UTF8", charsetContent);
     }
 
     @Test
-    void testResponseWithBody() {
-        InputStreamReader reader = getBodyWithSomeFileNames_InputReader();
-        AfspResponseParser parser = new AfspResponseParser(reader);
-        AfspResponse response = new AfspResponse();
+    void testResponseWithBody() throws InterruptedException {
+
+        var response = getBodyWithSomeFileNamesString();
+        AfspResponse incoming = null;
         // Act
         try {
-            response = parser.parseResponse(mock(SocketChannel.class));
-        } catch (AfspParsingException | AfspResponseException | AfspProcessingException e) {
-            fail("Error thrown when parsing valid response");
+            incoming = transferResponse(response);
+        } catch (AfspException e) {
+            fail("Exception thrown on valid response");
         }
-        //Assert
-        var body = response.getBody();
+
+        var body = incoming.getBody();
         var expected = "test.png\r\ntest2.png\r\ntest3.jpg";
         int contentLength;
         try {
-            var content = response.getHeader(AfspHeader.HeaderType.CONTENT_LENGTH).getHeaderContent();
+            var content = incoming.getHeader(AfspHeader.HeaderType.CONTENT_LENGTH).getHeaderContent();
             contentLength = Integer.parseInt(content);
         } catch (AfspProcessingException e) {
             fail("Content-length header content not found");
             return;
         }
-        body = body.substring(0,contentLength);
-        System.out.println(body.length());
+        body = body.substring(0, contentLength);
         assertEquals(expected, body);
 
     }
 
     //Helper functions
 
-    private InputStreamReader getValidResponse_InputReader() {
+    private String getValidResponseString() {
         String responseString = "AFSP/1.0 200 OK\r\nContent-length: 12\r\n\r\nHello world!";
-        return mocker.getReader(responseString);
+        return responseString;
     }
 
-    private InputStreamReader getInvalidResponseStatusCode_InputReader() {
+    private String getInvalidResponseStatusCodeString() {
         String responseString = "AFSP/1.0 999 Invalid Status Code\r\nContent-length: 0\r\n\r\n";
-        return mocker.getReader(responseString);
+        return responseString;
     }
 
-    private InputStreamReader getInvalidProtocolVersion_InputReader() {
+    private String getInvalidProtocolVersionString() {
         String responseString = "AFSP/2.0 200 OK\r\nContent-length: 12\r\n\r\nHello world!";
-        return mocker.getReader(responseString);
+        return responseString;
     }
 
-    private InputStreamReader getEmptyBody_InputReader() {
+    private String getEmptyBodyResponseString() {
         AfspResponse response = new AfspResponse()
                 .setStatusCode(AfspStatusCode.SERVER_SUCCESS_200_OK.STATUS_CODE);
-        return mocker.getReader(response.toString());
+        return response.toString();
     }
 
-    private InputStreamReader getAllHeaders_noBody_InputReader() {
+    private String getAllHeadersNoBodyResponseString() {
         AfspResponse response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
         response.addHeader(new AfspHeader(AfspHeader.HeaderType.CONTENT_LENGTH).setHeaderContent("1234"));
         response.addHeader(new AfspHeader(AfspHeader.HeaderType.CHARSET).setHeaderContent("UTF8"));
-        return mocker.getReader(response.toString());
+        return response.toString();
     }
 
-    private InputStreamReader getBodyWithSomeFileNames_InputReader() {
+    private String getBodyWithSomeFileNamesString() {
         AfspResponse response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
         response.addHeader(new AfspHeader(AfspHeader.HeaderType.CHARSET).setHeaderContent("UTF8"));
 
@@ -182,7 +204,38 @@ public class AfspResponseParserTest {
                 "test2.png\r\n" +
                 "test3.jpg");
         response.addHeader(new AfspHeader(AfspHeader.HeaderType.CONTENT_LENGTH).setHeaderContent(String.valueOf(response.getBody().getBytes().length)));
-        return mocker.getReader(response.toString());
+        return response.toString();
 
+    }
+
+    private AfspResponse transferResponse(String outResponse) throws AfspException, InterruptedException {
+        AtomicReference<AfspResponse> inResponse = new AtomicReference<>();
+        var parser = new AfspResponseParser();
+        AtomicReference<AfspException> error = new AtomicReference<>();
+        //Act
+        Thread serverThread = new Thread(() -> {
+            try {
+                inResponse.set(parser.parseResponse(serverChannel));
+            } catch (AfspParsingException | AfspResponseException | AfspProcessingException e) {
+                error.set(e);
+            }
+        });
+
+        Thread clientThread = new Thread(() -> {
+            try {
+                clientChannel.write(ByteBuffer.wrap(outResponse.toString().getBytes()));
+            } catch (IOException e) {
+            }
+        });
+        serverThread.start();
+        clientThread.start();
+
+        serverThread.join();
+        clientThread.join();
+
+        if (error.get() != null) {
+            throw error.get();
+        }
+        return inResponse.get();
     }
 }

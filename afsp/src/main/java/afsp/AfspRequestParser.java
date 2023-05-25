@@ -18,22 +18,11 @@ import java.nio.charset.StandardCharsets;
 public class AfspRequestParser {
 
     private final Logger LOGGER = LoggerFactory.getLogger(AfspRequestParser.class);
-    private InputStreamReader reader = null;
-    public AfspRequestParser() {
-    }
-
-    //Constructor with reader for testing-purposes
-    public AfspRequestParser(InputStreamReader reader) {
-        this.reader = reader;
-    }
 
     public AfspRequest parseAfspRequest(SocketChannel channel) throws AfspParsingException {
         LOGGER.info("** Start Parsing Request **");
 
-        if(this.reader == null){
-            this.reader = new InputStreamReader(Channels.newInputStream(channel), StandardCharsets.UTF_8);
-        }
-
+        var reader = new InputStreamReader(Channels.newInputStream(channel), StandardCharsets.UTF_8);
 
         // get request from input stream
 
