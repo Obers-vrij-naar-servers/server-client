@@ -45,14 +45,12 @@ public class GetProcessor extends RequestProcessor {
         try {
             out.write(response.toString().getBytes());
         } catch (IOException e) {
-            //TODO HANDLE ERROR
-            e.printStackTrace();
+            throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
         try{
             fileHandler.sendFile(target, bufferSize, channel);
         }catch (IOException e) {
             throw new AfspProcessingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
         }
-        done = true;
     }
 }
