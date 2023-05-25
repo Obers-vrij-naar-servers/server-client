@@ -92,6 +92,8 @@ public class AfspFileHandler {
             buffer.clear();
         }
         System.out.print("\u001B[32m\033[1m SUCCESS!!\u001B[0m\n");
+
+
     }
 
     public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName, String identifier) throws IOException, AfspParsingException, AfspProcessingException {

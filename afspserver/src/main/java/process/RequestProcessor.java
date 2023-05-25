@@ -16,7 +16,6 @@ public abstract class RequestProcessor{
     protected AfspResponse response;
 
     protected final SocketChannel channel;
-    public boolean done = false;
 
     public RequestProcessor(AfspRequest request, AfspResponse response, SocketChannel channel) {
         this.request = request;

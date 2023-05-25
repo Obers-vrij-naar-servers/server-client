@@ -28,7 +28,7 @@ public class AfspConnectionWorkerThreadChanneled extends Thread {
 
         AfspRequestParser parser = new AfspRequestParser();
         AfspRequest request;
-        AfspResponse response = new AfspResponse(AfspStatusCode.SERVER_SUCCESS_200_OK);
+        AfspResponse response;
         RequestProcessor processor = null;
         try {
             request = parser.parseAfspRequest(channel);
@@ -62,7 +62,7 @@ public class AfspConnectionWorkerThreadChanneled extends Thread {
             try {
                 out.write(response.toString().getBytes());
             } catch (IOException ex) {
-                throw new RuntimeException(ex);
+                LOGGER.debug("Connection closed by client");
             }
         }
     }

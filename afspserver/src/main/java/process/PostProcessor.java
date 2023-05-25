@@ -29,7 +29,7 @@ public class PostProcessor extends RequestProcessor {
         //CHECK IF ALL HEADERS ARE PRESENT AND FIND RELEVANT VALUES
         ArrayList<HeaderType> shouldHaveHeaderTypes = new ArrayList<>(Arrays.asList(HeaderType.BUFFER_SIZE, HeaderType.CHARSET, HeaderType.CONTENT_LENGTH, HeaderType.TIME_OUT, HeaderType.IDENTIFIER));
         int bufferSize = 0;
-        int contentLength = 0;
+        long contentLength = 0;
         var identifier = "";
         LOGGER.info("SEARCHING HEADERS");
         for (HeaderType ht : shouldHaveHeaderTypes) {
@@ -38,7 +38,7 @@ public class PostProcessor extends RequestProcessor {
                 bufferSize = Integer.parseInt(header.getHeaderContent());
             }
             if (header.getHeaderType() == HeaderType.CONTENT_LENGTH) {
-                contentLength = Integer.parseInt(header.getHeaderContent());
+                contentLength = Long.parseLong(header.getHeaderContent());
             }
             if (header.getHeaderType() == HeaderType.IDENTIFIER) {
                 identifier = header.getHeaderContent();

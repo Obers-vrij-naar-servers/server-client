@@ -72,6 +72,7 @@ public class GetProcessor extends BaseProcessor {
                     if(header.getHeaderType() == AfspHeader.HeaderType.IDENTIFIER) {
                         if (header.getHeaderContent().equals(identifier)) {
                             System.out.println("\u001B[36m" + "File already exists and is up-to-date!" + "\u001B[0m");
+                            socket.close();
                             return;
                         }
                     }
