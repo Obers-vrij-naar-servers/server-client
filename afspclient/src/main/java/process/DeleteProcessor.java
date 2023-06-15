@@ -26,8 +26,7 @@ public class DeleteProcessor extends BaseProcessor {
         if (response.getStatusCode() != 200) {
             System.out.println("Error occurred while deleting file, you might need to run 1. Show all files first");
         } else {
-            System.out.println("\u001B[32m\033[1mSUCCESS!! the file is deleted" + request.getTarget() + "\u001B[0m");
-
+            System.out.println("\u001B[32m\033[1mSUCCESS!! the file is deleted: " + request.getTarget() + "\u001B[0m");
         }
     }
 }
