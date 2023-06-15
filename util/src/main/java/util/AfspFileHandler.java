@@ -92,8 +92,6 @@ public class AfspFileHandler {
             buffer.clear();
         }
         System.out.print("\u001B[32m\033[1m SUCCESS!!\u001B[0m\n");
-
-
     }
 
     public void receiveFile(SocketChannel channel, long fileSize, int bufferSize, String fileName, String identifier) throws IOException, AfspParsingException, AfspProcessingException {
@@ -106,11 +104,15 @@ public class AfspFileHandler {
             Files.createDirectories(Paths.get(localFileDir));
         }
 
+        // prevent error when program was interrupted before removing the backup-file
+        if (Files.exists(backupFilePath)){
+            Files.delete(backupFilePath);
+        }
+
         // Create backup file if the file already exists on server
         if (Files.exists(filePath)) {
             LOGGER.info(" ** CREATING BACKUP ** ");
             Files.move(filePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
-
         }
 
         System.out.print("\033[3m\u001B[37mDownloading file: \u001B[0m" + fileName + "...");
@@ -161,7 +163,7 @@ public class AfspFileHandler {
                 LOGGER.info(" ** RESTORING BACKUP ** ");
                 Files.move(backupFilePath, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
-            throw new AfspParsingException(AfspStatusCode.SERVER_ERROR_500_INTERNAL_SERVER_ERROR);
+            throw new AfspParsingException(AfspStatusCode.SERVER_SUCCESS_304_NOT_MODIFIED);
 
         }
         //else if it matched. check for a backup file and delete it
